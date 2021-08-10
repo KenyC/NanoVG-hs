@@ -10,6 +10,7 @@ import Control.Monad.Reader
 import Control.Monad.IO.Class
 
 import Graphics.NanoVG.Internal
+import Graphics.NanoVG.Internal.State
 
 data NVGContext = NVGContext {
     _getNVGContext :: !(ForeignPtr ())
@@ -41,3 +42,14 @@ nvgGL3Context flags = do
     pointer    <- c_createGL3 $ compileCreateFlags flags
     foreignPtr <- newForeignPtr c_destroyGL3 pointer
     return $ NVGContext foreignPtr
+
+
+
+save :: VG ()
+save = applyContext c_save
+
+restore :: VG ()
+restore = applyContext c_restore
+
+reset :: VG ()
+reset = applyContext c_reset

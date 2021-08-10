@@ -62,6 +62,7 @@ main = do
 
                         rotate (pi/4)
                         square
+                        save
 
                         resetTransform
                         translate $ V2 40 30
@@ -86,6 +87,14 @@ main = do
                                     (V3 0 3 4)
                                     (V3 0 0 1)
                         putTransform tf
+                        square
+
+                        restore
+                        translate $ V2 5 5
+                        square
+
+                        reset
+                        translate $ V2 5 5
                         square
 
     let appLoop = do
