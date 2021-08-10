@@ -27,6 +27,7 @@ library
   hs-source-dirs:      lib/
   exposed-modules:
     Graphics.NanoVG.Internal
+    Graphics.NanoVG.Internal.Image
     Graphics.NanoVG.Internal.Path
     Graphics.NanoVG.Internal.State
     Graphics.NanoVG.Internal.Transform
@@ -145,6 +146,36 @@ executable Transform
 
 executable TransformInternal
   hs-source-dirs:      test/Transform/Internal
+  main-is:             Main.hs
+  other-modules:       Glew
+  -- other-extensions:
+  build-depends:       
+    NanoVG,
+    -- glew,
+    base >=4.13 && <4.14,
+    sdl2,
+    OpenGLRaw,
+    text,
+    linear
+  default-language:    Haskell2010
+
+executable Image
+  hs-source-dirs:      test/Image/API/
+  main-is:             Main.hs
+  other-modules:       Glew
+  -- other-extensions:
+  build-depends:       
+    NanoVG,
+    -- glew,
+    base >=4.13 && <4.14,
+    sdl2,
+    OpenGLRaw,
+    text,
+    linear
+  default-language:    Haskell2010
+
+executable ImageInternal
+  hs-source-dirs:      test/Image/Internal
   main-is:             Main.hs
   other-modules:       Glew
   -- other-extensions:
