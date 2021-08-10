@@ -7,15 +7,19 @@ import qualified SDL
 import Graphics.GL
 --
 import Control.Monad
+import Control.Monad.IO.Class
 --
 import Foreign.ForeignPtr
 --
 import Linear.V2
+import Linear.V3
 
 import Graphics.NanoVG
 import Graphics.NanoVG.Color
 import Graphics.NanoVG.Context
+import Graphics.NanoVG.Transform
 import Graphics.NanoVG.Draw
+import Graphics.NanoVG.Draw.Path
 import Glew
 import Test
 
@@ -33,20 +37,56 @@ main = do
     }
     
     context <- SDL.glCreateContext window
-    -- glewInit
+    glewInit
 
   
     glClearColor 1 1 1 1
 
     nanovg <- nvgGL3Context [debug]
 
+    let square :: VG ()
+        square = withPath False $ do
+            rect (V2 0 0) (V2 20 20)
+            strokeColor (Color 1 0 0 1)
+            stroke
+            return ()
+
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
                 withContext nanovg $
                     withFrame windowResolution $ do
-                        rect        (V2 20 30) (V2 20 30)
-                        strokeColor (Color 1 0 0 1)
-                        stroke     
+                        square
+
+                        translate $ V2 50 50
+                        square
+
+                        rotate (pi/4)
+                        square
+
+                        resetTransform
+                        translate $ V2 40 30
+                        square
+
+                        resetTransform
+                        translate $ V2 80 80
+                        skewX 2
+                        square
+
+                        resetTransform
+                        translate $ V2 80 80
+                        skewY 2
+                        square
+
+                        resetTransform 
+                        tf <- getTransform
+                        liftIO $ print tf
+
+                        let tf = V3
+                                    (V3 2 0 2)
+                                    (V3 0 3 4)
+                                    (V3 0 0 1)
+                        putTransform tf
+                        square
 
     let appLoop = do
             render

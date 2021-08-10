@@ -723,6 +723,7 @@ void nvgResetTransform(NVGcontext* ctx)
 
 void nvgTranslate(NVGcontext* ctx, float x, float y)
 {
+	LOG("Translate by %f %f\n", x, y);
 	NVGstate* state = nvg__getState(ctx);
 	float t[6];
 	nvgTransformTranslate(t, x,y);

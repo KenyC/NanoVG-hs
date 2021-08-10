@@ -28,8 +28,10 @@ library
   exposed-modules:
     Graphics.NanoVG.Internal
     Graphics.NanoVG.Internal.Path
+    Graphics.NanoVG.Internal.Transform
     Graphics.NanoVG.Color
     Graphics.NanoVG.Context
+    Graphics.NanoVG.Transform
     Graphics.NanoVG.Draw
     Graphics.NanoVG.Draw.Path
     Graphics.NanoVG
