@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase        #-}
 module Main where
 
 import SDL (($=))
@@ -16,6 +17,8 @@ import Graphics.NanoVG
 import Graphics.NanoVG.Color
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Draw
+import Graphics.NanoVG.Image
+import Graphics.NanoVG.Paint
 import Glew
 import Test
 
@@ -40,22 +43,27 @@ main = do
 
     nanovg <- nvgGL3Context [debug]
 
-    let render = do
-                glClear $ GL_COLOR_BUFFER_BIT
-                withContext nanovg $
-                    withFrame windowResolution $ do
-                        rect        (V2 20 30) (V2 20 30)
-                        strokeColor (Color 1 0 0 1)
-                        stroke     
+    withImage nanovg "resources/image.jpg" $ \case
+        Nothing    -> putStrLn "Couldn't load image... Exiting!" 
+        Just image -> do
+                imagePaint <- withContext nanovg $ imagePattern 0 100 0 1 image
 
-    let appLoop = do
-            render
-            SDL.glSwapWindow $ window
-            events <- SDL.pollEvents
-            SDL.delay 1000
-            unless (any quitEvent events) appLoop
+                let render = do
+                        glClear $ GL_COLOR_BUFFER_BIT
+                        withContext nanovg $
+                            withFrame windowResolution $ do
+                                rect (V2 0 30) (V2 50 50)
+                                fillPaint imagePaint
+                                fill     
 
-    appLoop
+                let appLoop = do
+                        render
+                        SDL.glSwapWindow $ window
+                        events <- SDL.pollEvents
+                        SDL.delay 1000
+                        unless (any quitEvent events) appLoop
+
+                appLoop
 
     SDL.destroyWindow window
     SDL.quit

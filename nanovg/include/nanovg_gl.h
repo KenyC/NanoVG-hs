@@ -1620,8 +1620,8 @@ void nvgDeleteGLES2(NVGcontext* ctx)
 void nvgDeleteGLES3(NVGcontext* ctx)
 #endif
 {
-	LOG("DELETING %p!\n", ctx);
 	nvgDeleteInternal(ctx);
+	LOG("DELETING %p!\n", ctx);
 }
 
 #if defined NANOVG_GL2

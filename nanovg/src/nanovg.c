@@ -809,6 +809,7 @@ int nvgCreateImage(NVGcontext* ctx, const char* filename, int imageFlags)
 	}
 	image = nvgCreateImageRGBA(ctx, w, h, imageFlags, img);
 	stbi_image_free(img);
+	LOG("ALLOCATING %d\n", image);
 	return image;
 }
 
@@ -845,6 +846,7 @@ void nvgImageSize(NVGcontext* ctx, int image, int* w, int* h)
 
 void nvgDeleteImage(NVGcontext* ctx, int image)
 {
+	LOG("DEALLOCATING %d\n", image);
 	ctx->params.renderDeleteTexture(ctx->params.userPtr, image);
 }
 

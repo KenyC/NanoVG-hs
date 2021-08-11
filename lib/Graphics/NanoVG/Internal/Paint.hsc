@@ -63,7 +63,7 @@ foreign import ccall unsafe "nanovg_hs_wrapper.h nvgImagePatternHs"
     c_imagePattern :: Ptr ()
                    -> CFloat -> CFloat
                    -> CFloat -> CFloat
-                   -> CFloat -> CFloat -> CFloat 
+                   -> CFloat -> CInt   -> CFloat 
                    -> IO (Ptr ())
 
 -- foreign import ccall unsafe "nanovg_hs_wrapper.h printNvgPaint"

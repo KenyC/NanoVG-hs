@@ -7,15 +7,19 @@ import qualified SDL
 import Graphics.GL
 --
 import Control.Monad
+import Control.Monad.IO.Class
 --
 import Foreign.ForeignPtr
+import Foreign.Marshal.Alloc
+import Foreign.C.String
 --
 import Linear.V2
 
 import Graphics.NanoVG
-import Graphics.NanoVG.Color
 import Graphics.NanoVG.Context
-import Graphics.NanoVG.Draw
+import Graphics.NanoVG.Internal
+import Graphics.NanoVG.Internal.Paint
+import Graphics.NanoVG.Internal.Image
 import Glew
 import Test
 
@@ -25,7 +29,7 @@ main :: IO ()
 main = do
     SDL.initialize [SDL.InitVideo]
     
-    let windowSize = V2 200 300
+    let windowSize = V2 800 600
     let windowResolution = WindowResolution (realToFrac <$> windowSize) 4.0
     window <- SDL.createWindow "Test" $ SDL.defaultWindow {
         SDL.windowInitialSize     = windowSize,
@@ -38,15 +42,30 @@ main = do
   
     glClearColor 1 1 1 1
 
+
     nanovg <- nvgGL3Context [debug]
+    handle <- withForeignPtr (_getNVGContext nanovg) $ \ptr -> 
+                withCString "resources/image.jpg" $ \filename ->
+                    c_createImage ptr filename 0
+
+    print handle
 
     let render = do
-                glClear $ GL_COLOR_BUFFER_BIT
-                withContext nanovg $
-                    withFrame windowResolution $ do
-                        rect        (V2 20 30) (V2 20 30)
-                        strokeColor (Color 1 0 0 1)
-                        stroke     
+                    glClear $ GL_COLOR_BUFFER_BIT
+                    withContext nanovg $
+                      withFrame windowResolution $ do
+                        liftIO $ withForeignPtr (_getNVGContext nanovg) $ \ptr -> do
+                            imagePattern <- c_imagePattern ptr
+                                        0 0
+                                        100 100
+                                        0
+                                        handle
+                                        1
+
+                            c_rect ptr 0 0 50 50
+                            c_fillPaint ptr imagePattern
+                            c_fill ptr
+                            free imagePattern
 
     let appLoop = do
             render
@@ -56,6 +75,7 @@ main = do
             unless (any quitEvent events) appLoop
 
     appLoop
+    withForeignPtr (_getNVGContext nanovg) $ \ptr -> c_deleteImage ptr handle
 
     SDL.destroyWindow window
     SDL.quit

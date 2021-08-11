@@ -31,13 +31,14 @@ library
     Graphics.NanoVG.Context
     Graphics.NanoVG.Draw
     Graphics.NanoVG.Draw.Path
-    Graphics.NanoVG.Paint
+    Graphics.NanoVG.Image
     Graphics.NanoVG.Internal
     Graphics.NanoVG.Internal.Image
     Graphics.NanoVG.Internal.Paint
     Graphics.NanoVG.Internal.Path
     Graphics.NanoVG.Internal.State
     Graphics.NanoVG.Internal.Transform
+    Graphics.NanoVG.Paint
     Graphics.NanoVG.Transform
     Test
   build-depends:
