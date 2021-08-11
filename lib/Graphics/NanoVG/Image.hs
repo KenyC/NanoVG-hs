@@ -1,6 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Graphics.NanoVG.Image (
     Image(),
+    ImageFlag(..),
     withImage,
     imagePattern,
     imageSize
@@ -29,15 +30,16 @@ data Image = Image {
 
 -- | Runs the provided computation with an 'Image' loaded from file (extensions accepted: jpg, png, psd, tga, pic and gif).
 --   If image file does not exist or cannot be loaded, Nothing is passed to the continuation.
-withImage :: NVGContext -- ^ NanoVG context
-          -> FilePath   -- ^ Path to image file
-          -> (Maybe Image -> IO a) -- ^
+withImage :: NVGContext   -- ^ NanoVG context
+          -> FilePath     -- ^ Path to image file
+          -> [ImageFlag]  -- ^ Flags for image loading
+          -> (Maybe Image -> IO a) -- ^ computation to be run with image
           -> IO a
-withImage (NVGContext context) pathToImage = 
+withImage (NVGContext context) pathToImage flags = 
     bracket before after
     where before = withForeignPtr context $ \ptr -> do
                 handle <- withCString pathToImage $ \c_pathToImage ->
-                    c_createImage ptr c_pathToImage 0
+                    c_createImage ptr c_pathToImage (compileImageFlags flags)
                 case handle of 
                     0 -> return Nothing
                     _ -> return $ Just $ Image handle

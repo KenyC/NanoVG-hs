@@ -108,21 +108,6 @@ NVGpaint* nvgRadialGradientHs(
 	return to_return;
 }
 
-NVGpaint* nvgImagePatternHs(
-	NVGcontext* ctx, 
-	float ox, float oy, 
-	float ex, float ey,
-	float angle, int image, float alpha
-) {
-	NVGpaint* to_return = malloc(sizeof(NVGpaint));
-	*to_return = nvgImagePattern(
-		ctx, 
-		ox, oy, 
-		ex, ey,
-		angle, image, alpha
-	);
-	return to_return;
-}
 
 #ifndef RELEASE
 void printNvgPaint(NVGpaint* paint) {
@@ -168,11 +153,11 @@ NVGpaint* nvgImagePatternHs(
 	float alpha
 ) {
 	NVGpaint* to_return = malloc(sizeof(NVGpaint));
-	nvgImagePattern(
+	*to_return = nvgImagePattern(
 		ctx,
 		ox, oy,
 		ex, ey,
 		angle, image, alpha
-	)
+	);
 	return to_return;
 }

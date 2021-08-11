@@ -45,7 +45,7 @@ main = do
 
     nanovg <- nvgGL3Context [debug]
 
-    withImage nanovg "resources/image.jpg" $ \case
+    withImage nanovg "resources/image.jpg" [FlipY] $ \case
         Nothing    -> putStrLn "Couldn't load image... Exiting!" 
         Just image -> do
                 size       <- withContext nanovg $ imageSize image
@@ -58,7 +58,7 @@ main = do
                 let render = do
                         glClear $ GL_COLOR_BUFFER_BIT
                         frame nanovg windowResolution $ do
-                                rect (V2 0 30) (V2 50 50)
+                                rect (V2 0 0) (V2 50 50)
                                 fillPaint imagePaint
                                 fill     
 
