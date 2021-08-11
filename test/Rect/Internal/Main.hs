@@ -41,8 +41,7 @@ main = do
 
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
-                withContext nanovg $
-                    withFrame windowResolution $ do
+                frame nanovg windowResolution $ do
                         liftIO $ withForeignPtr (_getNVGContext nanovg) $ \ptr -> do
                             c_rect ptr 20 30 20 30
                             c_strokeColor ptr 1 0 0 1

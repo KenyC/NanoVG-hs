@@ -43,8 +43,7 @@ main = do
 
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
-                withContext nanovg $
-                    withFrame windowResolution $ do
+                frame nanovg windowResolution $ do
                         withPath True $ do
                             moveTo (V2 20 20)
                             lineTo (V2 40 40)

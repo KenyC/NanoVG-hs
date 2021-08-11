@@ -42,8 +42,7 @@ main = do
 
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
-                withContext nanovg $
-                    withFrame windowResolution $ do
+                frame nanovg windowResolution $ do
                         rect        (V2 20 30) (V2 20 30)
                         strokeColor (Color 1 0 0 1)
                         stroke     

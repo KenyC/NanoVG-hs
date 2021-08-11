@@ -7,7 +7,7 @@ module Graphics.NanoVG(
     antialias,
 
     --
-    withFrame
+    frame
 ) where
 
 import Foreign.Ptr
@@ -18,15 +18,19 @@ import Linear.V2
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Internal
 
-withFrame :: WindowResolution 
-          -> VG () 
-          -> VG ()
-withFrame (WindowResolution (V2 width height) dpi) cont = do 
-    applyContext $ \ptr ->
-        c_beginFrame 
-            ptr 
-            (realToFrac width) 
-            (realToFrac height) 
-            (realToFrac dpi)
-    cont
-    applyContext c_endFrame
+frame :: NVGContext
+      -> WindowResolution 
+      -> VG () 
+      -> IO ()
+frame 
+    context@(NVGContext foreignPtr) 
+    (WindowResolution (V2 width height) dpi) 
+    cont = do 
+                withForeignPtr foreignPtr $ \ptr -> do
+                    c_beginFrame 
+                        ptr 
+                        (realToFrac width) 
+                        (realToFrac height) 
+                        (realToFrac dpi)
+                    withContext context cont
+                    c_endFrame ptr

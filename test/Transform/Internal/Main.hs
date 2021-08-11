@@ -65,8 +65,7 @@ main = do
 
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
-                withContext nanovg $
-                    withFrame windowResolution $ do
+                frame nanovg windowResolution $ do
                         liftIO $ withForeignPtr (_getNVGContext nanovg) $ \ptr -> do
                             square ptr
 

@@ -53,8 +53,7 @@ main = do
 
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
-                withContext nanovg $
-                    withFrame windowResolution $ do
+                frame nanovg windowResolution $ do
                         square
 
                         translate $ V2 50 50
