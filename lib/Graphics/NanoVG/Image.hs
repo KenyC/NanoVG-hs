@@ -1,7 +1,9 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Graphics.NanoVG.Image (
     Image(),
     withImage,
-    imagePattern
+    imagePattern,
+    imageSize
 ) where
 
 import Control.Exception (bracket)
@@ -10,8 +12,11 @@ import Linear.V2
 --
 import Foreign.Ptr
 import Foreign.ForeignPtr
+import Foreign.Ptr
 import Foreign.C.String
 import Foreign.C.Types
+import Foreign.Marshal.Alloc
+import Foreign.Storable
 
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Paint
@@ -38,6 +43,16 @@ withImage (NVGContext context) pathToImage =
 
           after Nothing               = return ()
           after (Just (Image handle)) = withForeignPtr context $ \ptr -> c_deleteImage ptr handle
+
+
+imageSize :: Image -> VG (V2 Int)
+imageSize (Image image) = applyContext $ \ptr -> do
+    alloca $ \(c_width  :: Ptr CInt) ->
+        alloca $ \(c_height :: Ptr CInt) -> do
+            c_imageSize ptr image c_width c_height
+            width  <- peek c_width
+            height <- peek c_height
+            return $! fromIntegral  <$> V2 width height
 
 
 imagePattern :: (V2 Float)

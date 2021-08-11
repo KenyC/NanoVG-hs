@@ -48,7 +48,6 @@ main = do
                 withCString "resources/image.jpg" $ \filename ->
                     c_createImage ptr filename 0
 
-    print handle
 
     let render = do
                     glClear $ GL_COLOR_BUFFER_BIT

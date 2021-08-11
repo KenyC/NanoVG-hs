@@ -1,5 +1,6 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE LambdaCase          #-}
 module Main where
 
 import SDL (($=))
@@ -46,7 +47,12 @@ main = do
     withImage nanovg "resources/image.jpg" $ \case
         Nothing    -> putStrLn "Couldn't load image... Exiting!" 
         Just image -> do
-                imagePaint <- withContext nanovg $ imagePattern 0 100 0 1 image
+                size       <- withContext nanovg $ imageSize image
+                imagePaint <- withContext nanovg $ 
+                                imagePattern 
+                                    0 (fromIntegral <$> size) 
+                                    0 1 
+                                    image
 
                 let render = do
                         glClear $ GL_COLOR_BUFFER_BIT
