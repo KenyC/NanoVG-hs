@@ -7,16 +7,19 @@ import qualified SDL
 import Graphics.GL
 --
 import Control.Monad
-import Control.Monad.IO.Class
 --
 import Foreign.ForeignPtr
 --
 import Linear.V2
 
 import Graphics.NanoVG
+import Graphics.NanoVG.Color
 import Graphics.NanoVG.Context
-import Graphics.NanoVG.Internal
+import Graphics.NanoVG.Draw
+import Graphics.NanoVG.Paint
+import Graphics.NanoVG.Draw.Path
 import Glew
+import Test
 
 
 
@@ -38,15 +41,49 @@ main = do
     glClearColor 1 1 1 1
 
     nanovg <- nvgGL3Context [debug]
+    linear <- withContext nanovg $ linearGradient
+                                (V2 0 0)
+                                (V2 100 0)
+                                (Color 1 0 0 1)
+                                (Color 0 1 0 1)
+
+    box <- withContext nanovg $ boxGradient
+                                (V2 0 100)
+                                (V2 200 50)
+                                20
+                                5
+                                (Color 1 0 0 1)
+                                (Color 0 1 0 1)
+
+    radial <- withContext nanovg $ radialGradient
+                                (V2 100 300)
+                                10 
+                                150
+                                (Color 1 0 0 1)
+                                (Color 0 1 0 1)
 
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
+
                 withContext nanovg $
-                    withFrame windowResolution $ do
-                        liftIO $ withForeignPtr (_getNVGContext nanovg) $ \ptr -> do
-                            c_rect ptr 20 30 20 30
-                            c_strokeColor ptr 1 0 0 1
-                            c_stroke ptr
+                  withFrame windowResolution $ do
+
+                    withPath False $ do
+                        rect 0 (V2 200 50)
+                        fillPaint linear
+                        fill   
+
+                    withPath False $ do
+                        rect (V2 0 100) (V2 200 50)
+                        fillPaint box
+                        fill  
+
+                    withPath False $ do
+                        rect (V2 0 200) (V2 200 200)
+                        fillPaint radial
+                        fill     
+
+
 
     let appLoop = do
             render

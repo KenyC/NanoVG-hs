@@ -34,7 +34,7 @@ withContext context (VG body) = runReaderT body context
 applyContext :: (Ptr () -> IO a) -> VG a
 applyContext function = VG $ withReaderT _getNVGContext $ do
                             foreignPtr <- ask
-                            lift $ withForeignPtr foreignPtr function
+                            liftIO $ withForeignPtr foreignPtr function
 
 
 nvgGL3Context :: [CreateFlags] -> IO NVGContext

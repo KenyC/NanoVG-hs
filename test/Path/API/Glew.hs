@@ -1,1 +1,14 @@
-/home/keny/Programmation/Haskell/Libraries/NanoVG_test/NanoVG/lib/Graphics/GL/Glew.hs
+{-# LANGUAGE ForeignFunctionInterface #-}
+
+module Glew where
+
+import Graphics.GL
+--
+import Foreign
+import Foreign.C.Types
+
+
+foreign import ccall "GL/glew.h glewInit" 
+    glewInit :: IO GLenum
+
+ 

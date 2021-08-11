@@ -10,13 +10,17 @@ import Control.Monad
 import Control.Monad.IO.Class
 --
 import Foreign.ForeignPtr
+import Foreign.Marshal.Alloc
 --
 import Linear.V2
 
 import Graphics.NanoVG
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Internal
+import Graphics.NanoVG.Internal.Paint
+import Graphics.NanoVG.Internal.Path
 import Glew
+import Test
 
 
 
@@ -39,14 +43,50 @@ main = do
 
     nanovg <- nvgGL3Context [debug]
 
+
+
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
                 withContext nanovg $
                     withFrame windowResolution $ do
                         liftIO $ withForeignPtr (_getNVGContext nanovg) $ \ptr -> do
-                            c_rect ptr 20 30 20 30
-                            c_strokeColor ptr 1 0 0 1
-                            c_stroke ptr
+
+                            -- c_printPaint linear
+                            c_beginPath ptr
+                            linear <- c_linearGradient ptr
+                                        0 0
+                                        100 0
+                                        1 0 0 1
+                                        0 1 0 1
+                            c_rect ptr 0 0 200 50
+                            c_fillPaint ptr linear
+                            c_fill ptr
+                            free linear
+
+                            c_beginPath ptr
+                            box <- c_boxGradient ptr
+                                        0 100
+                                        200 50
+                                        20 5
+                                        1 0 0 1
+                                        0 1 0 1
+                            c_rect ptr 0 100 200 50
+                            c_fillPaint ptr box
+                            c_fill ptr
+                            free box
+
+                            c_beginPath ptr
+                            radial <- c_radialGradient ptr
+                                        100 300
+                                        10 150
+                                        1 0 0 1
+                                        0 1 0 1
+                            c_rect ptr 0 200 200 200
+                            c_fillPaint ptr radial
+                            c_fill ptr
+                            free radial
+
+
 
     let appLoop = do
             render
