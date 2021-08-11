@@ -33,6 +33,7 @@ fillPaint (Paint foreignPtr) =
         c_fillPaint ptrContext ptrPaint
 
 
+-- | Creates linear gradient from start point to end point
 linearGradient :: (V2 Float)  -- ^ position of start point
                -> (V2 Float)  -- ^ position of end point
                -> Color       -- ^ color at start point
@@ -53,7 +54,8 @@ linearGradient
 
 
 
-
+-- | Creates paint which is a box gradient. A box gradient is a feathered (i.e. blurry) rounded rectangle, it is useful for rendering
+--   drop shadows or highlights for boxes.
 boxGradient :: (V2 Float)  -- ^ position of top left corner 
             -> (V2 Float)  -- ^ box dimensions (width x height)
             -> Float       -- ^ radius  of rounded corner
@@ -79,7 +81,7 @@ boxGradient
 
 
 
-
+-- | Creates radial gradient from inner radius to outer radius
 radialGradient :: (V2 Float)  -- ^ position of gradient's center 
                -> Float       -- ^ inner radius
                -> Float       -- ^ outer radius 

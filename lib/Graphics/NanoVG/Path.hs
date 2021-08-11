@@ -9,22 +9,23 @@ import Graphics.NanoVG.Internal (c_rect)
 import Graphics.NanoVG.Internal.Path
 import Graphics.NanoVG.Context
 
-withPath :: Bool 
-         -> VG () 
+
+-- | Starts new path. A path is a series of line, which can then be stroked (cf 'stroke') or filled (cf 'fill).
+withPath :: Bool   -- ^ Whether the path should be closed
+         -> VG ()  -- ^ Path drawing instructions
          -> VG ()
 withPath closed cont = do
                             applyContext c_beginPath
                             cont
                             when closed $ applyContext c_closePath
-        -- when closed cont
-        -- when closed (applyContext c_closePath)
 
 
 
 
 
 
-lineTo :: V2 Float
+-- | Adds a line from current position to the position given as argument to the current path 
+lineTo :: V2 Float -- ^ Position to draw line
        -> VG ()
 lineTo (V2 x y) = 
     applyContext $ \ptr -> c_lineTo 
@@ -32,7 +33,8 @@ lineTo (V2 x y) =
                                 (realToFrac x)
                                 (realToFrac y)
 
-moveTo :: V2 Float
+-- | Moves current position to position given as argument. No line is drawn
+moveTo :: V2 Float -- ^ New current position
        -> VG ()
 moveTo (V2 x y) = 
     applyContext $ \ptr -> c_moveTo 
@@ -40,6 +42,7 @@ moveTo (V2 x y) =
                               (realToFrac x)
                               (realToFrac y)
 
+-- | Adds a Bezier curve between current position and position given as argument to the path
 bezierTo :: V2 Float -- ^ control point 1
          -> V2 Float -- ^ control point 2
          -> V2 Float -- ^ position
@@ -55,6 +58,7 @@ bezierTo
                                 (realToFrac x)   (realToFrac y)
 
 
+-- | Adds a part of a circle to the path
 arcTo :: V2 Float -- ^ corner 1
       -> V2 Float -- ^ corner 2
       -> Float    -- ^ radius
@@ -69,6 +73,7 @@ arcTo
                                 (realToFrac cx2) (realToFrac cy2)
                                 (realToFrac radius)
 
+-- | Adds a quadratic Bezier curve between current position and position given as argument.
 quadTo :: V2 Float -- ^ control point
        -> V2 Float -- ^ position
        -> VG ()
@@ -80,7 +85,7 @@ quadTo
                                 (realToFrac cx1) (realToFrac cy1)
                                 (realToFrac cx2) (realToFrac cy2)
 
--- | Creates a rectangular path
+-- | Adds a rectangle to the current path
 rect :: V2 Float -- ^ position of top-left corner
      -> V2 Float -- ^ dimensions (width, height)
      -> VG ()

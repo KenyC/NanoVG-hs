@@ -27,10 +27,11 @@ data Image = Image {
     _imageHandle :: !CInt
 }
 
-
-withImage :: NVGContext
-          -> FilePath 
-          -> (Maybe Image -> IO a)
+-- | Runs the provided computation with an 'Image' loaded from file (extensions accepted: jpg, png, psd, tga, pic and gif).
+--   If image file does not exist or cannot be loaded, Nothing is passed to the continuation.
+withImage :: NVGContext -- ^ NanoVG context
+          -> FilePath   -- ^ Path to image file
+          -> (Maybe Image -> IO a) -- ^
           -> IO a
 withImage (NVGContext context) pathToImage = 
     bracket before after
@@ -45,6 +46,7 @@ withImage (NVGContext context) pathToImage =
           after (Just (Image handle)) = withForeignPtr context $ \ptr -> c_deleteImage ptr handle
 
 
+-- | Returns dimensions (width, height) of image.
 imageSize :: Image -> VG (V2 Int)
 imageSize (Image image) = applyContext $ \ptr -> do
     alloca $ \(c_width  :: Ptr CInt) ->
@@ -55,12 +57,13 @@ imageSize (Image image) = applyContext $ \ptr -> do
             return $! fromIntegral  <$> V2 width height
 
 
-imagePattern :: (V2 Float)
-             -> (V2 Float)
-             -> Float
-             -> Float
-             -> Image
-             -> VG Paint
+-- | Creates a texture from an image. The texture can then be passed to 'fillPaint' to draw the image on the screen.
+imagePattern :: (V2 Float) -- ^ Where to draw top left corner of image 
+             -> (V2 Float) -- ^ Where to draw bottom right of image
+             -> Float      -- ^ Angle of rotation of image
+             -> Float      -- ^ Level of transparency of image (i.e. alpha value, from 0 to 1)
+             -> Image      -- ^ image
+             -> VG Paint   -- ^ paint ; can be passed to 'fillPaint'
 imagePattern
     (V2 startX endX)
     (V2 startY endY)

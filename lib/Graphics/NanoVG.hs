@@ -18,9 +18,10 @@ import Linear.V2
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Internal
 
-frame :: NVGContext
-      -> WindowResolution 
-      -> VG () 
+-- | Creates a drawing frame, i.e. a list of drawing instructions. The frame will be drawn on next screen refresh.
+frame :: NVGContext       -- ^ NanoVG context
+      -> WindowResolution -- ^ Window size and dpi
+      -> VG ()            -- ^ Drawing instructions
       -> IO ()
 frame 
     context@(NVGContext foreignPtr) 
