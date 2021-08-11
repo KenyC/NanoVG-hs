@@ -1,10 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Graphics.NanoVG.Draw.Path where
+module Graphics.NanoVG.Path where
 
 import Control.Monad
 import Linear.V2
 import Foreign.ForeignPtr
 
+import Graphics.NanoVG.Internal (c_rect)
 import Graphics.NanoVG.Internal.Path
 import Graphics.NanoVG.Context
 
@@ -78,3 +79,15 @@ quadTo
                                 ptr 
                                 (realToFrac cx1) (realToFrac cy1)
                                 (realToFrac cx2) (realToFrac cy2)
+
+-- | Creates a rectangular path
+rect :: V2 Float -- ^ position of top-left corner
+     -> V2 Float -- ^ dimensions (width, height)
+     -> VG ()
+rect
+    (V2 x y)
+    (V2 w h) =
+    applyContext $ \ptr -> 
+        c_rect ptr 
+            (realToFrac x) (realToFrac y) 
+            (realToFrac w) (realToFrac h)

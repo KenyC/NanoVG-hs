@@ -18,6 +18,7 @@ import Graphics.NanoVG
 import Graphics.NanoVG.Color
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Draw
+import Graphics.NanoVG.Path
 import Graphics.NanoVG.Image
 import Graphics.NanoVG.Paint
 import Glew
