@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "debug.h"
 
 #include "nanovg.h"
@@ -42,7 +44,7 @@ void nvgStrokePaintHs(NVGcontext* ctx, NVGpaint *paint) {
 }
 
 void nvgFillPaintHs(NVGcontext* ctx, NVGpaint* paint) {
-	printf("%p %p", ctx, paint);
+	LOG("%p %p", ctx, paint);
 	nvgFillPaint(ctx, *paint);
 }
 

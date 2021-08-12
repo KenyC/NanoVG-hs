@@ -1,6 +1,7 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#define RELEASE
 
 #ifndef RELEASE
 #   ifndef SHUNT_LOG

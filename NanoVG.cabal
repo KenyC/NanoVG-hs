@@ -54,10 +54,13 @@ library
 
 
 
-executable FFI
+executable demo
   hs-source-dirs:      src/
   main-is:             Main.hs
-  other-modules:       Glew
+  other-modules:       
+    Glew
+    Render
+    WindowState
   -- other-extensions:
   build-depends:       
     NanoVG,

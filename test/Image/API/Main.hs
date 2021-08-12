@@ -78,7 +78,7 @@ main = do
                                         image2
 
                 let render = do
-                        glClear $ GL_COLOR_BUFFER_BIT
+                        glClear GL_COLOR_BUFFER_BIT
                         frame nanovg windowResolution $ do
                                 withPath False $ do
                                     rect (V2 0 0) (V2 50 50)

@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
 import SDL (($=))
@@ -13,9 +14,10 @@ import Foreign.ForeignPtr
 import Linear.V2
 
 import Graphics.NanoVG
-import Graphics.NanoVG.Internal
+import Render
+import WindowState
 import Glew
-import Test
+
 
 quitEvent :: SDL.Event -> Bool
 quitEvent event = case SDL.eventPayload event of 
@@ -40,17 +42,26 @@ main = do
     context <- SDL.glCreateContext window
     glewInit
 
+    nvgContext <- nvgGL3Context [debug]
+
   
     glClearColor 1 1 1 1
 
+    let state = WindowState {
+        time = 0
+    }
 
-    let appLoop = do
+    let appLoop currentState = do
+
             SDL.glSwapWindow $ window
-            events <- SDL.pollEvents
-            SDL.delay 1000
-            unless (any quitEvent events) appLoop
+            render nvgContext windowResolution currentState
+            events    <- SDL.pollEvents
+            time      <- SDL.ticks
+            SDL.delay 60
+            unless (any quitEvent events) $ appLoop $ currentState {time = (fromIntegral time) / 1000}
 
-    appLoop
+    appLoop state
     SDL.destroyWindow window
     SDL.quit
+
 
