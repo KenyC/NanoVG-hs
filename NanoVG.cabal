@@ -44,6 +44,7 @@ library
   build-depends:
     base >=4.13 && <4.14,
     mtl,
+    bytestring,
     linear
   default-language:    Haskell2010
   extra-libraries:     nanovg, testy, GL, GLEW
@@ -200,7 +201,8 @@ executable Image
     sdl2,
     OpenGLRaw,
     text,
-    linear
+    linear,
+    bytestring
   default-language:    Haskell2010
 
 executable ImageInternal

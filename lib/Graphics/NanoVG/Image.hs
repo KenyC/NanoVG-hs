@@ -3,11 +3,15 @@ module Graphics.NanoVG.Image (
     Image(),
     ImageFlag(..),
     withImage,
+    withImageRGBA,
     imagePattern,
     imageSize
 ) where
 
 import Control.Exception (bracket)
+--
+import Data.ByteString        (ByteString)
+import Data.ByteString.Unsafe
 --
 import Linear.V2
 --
@@ -32,8 +36,8 @@ data Image = Image {
 --   If image file does not exist or cannot be loaded, Nothing is passed to the continuation.
 withImage :: NVGContext   -- ^ NanoVG context
           -> FilePath     -- ^ Path to image file
-          -> [ImageFlag]  -- ^ Flags for image loading
-          -> (Maybe Image -> IO a) -- ^ computation to be run with image
+          -> [ImageFlag]  -- ^ Flags
+          -> (Maybe Image -> IO a) -- ^ Computation to be run with image
           -> IO a
 withImage (NVGContext context) pathToImage flags = 
     bracket before after
@@ -46,6 +50,34 @@ withImage (NVGContext context) pathToImage flags =
 
           after Nothing               = return ()
           after (Just (Image handle)) = withForeignPtr context $ \ptr -> c_deleteImage ptr handle
+
+
+-- | Load an image from memory.
+withImageRGBA :: NVGContext      -- ^ NanoVG context
+              -> V2 Int          -- ^ Image dimensions (width, height)
+              -> ByteString      -- ^ Image RGBA data. The layout of the data is column-first, channel-last: at index i*height*4 + j**4 + c, is found the *c*-th component of the pixel in row i and column j.
+              -> [ImageFlag]     -- ^ Flags 
+              -> (Image -> IO a) -- ^ Computation to be run with image
+              -> IO a
+
+withImageRGBA 
+    (NVGContext context) 
+    (V2 width height) 
+    imgData
+    flags
+    = 
+    bracket before after
+    where before = do
+                      withForeignPtr context        $ \ptr        -> do
+                          unsafeUseAsCString imgData    $ \imgArray   -> do
+                            Image <$> c_createImageRGBA 
+                                ptr                        
+                                (fromIntegral width)
+                                (fromIntegral height)
+                                (compileImageFlags flags)
+                                (castPtr imgArray)
+
+          after (Image handle) = withForeignPtr context $ \ptr -> c_deleteImage ptr handle
 
 
 -- | Returns dimensions (width, height) of image.

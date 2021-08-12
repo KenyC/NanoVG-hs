@@ -3,6 +3,9 @@
 {-# LANGUAGE LambdaCase          #-}
 module Main where
 
+import Data.ByteString  (ByteString)
+import qualified Data.ByteString as BS
+--
 import SDL (($=))
 import qualified SDL
 --
@@ -20,10 +23,22 @@ import Graphics.NanoVG.Context
 import Graphics.NanoVG.Draw
 import Graphics.NanoVG.Path
 import Graphics.NanoVG.Image
+import Graphics.NanoVG.Transform
 import Graphics.NanoVG.Paint
 import Glew
 import Test
 
+
+-- A radial gradient from black to green
+imageData :: ByteString
+imageData = BS.pack $ [ case (i, j, k) of 
+                            (_, _, 3)   -> 255
+                            (0, j, 1)   -> fromIntegral $ min 255 $ ((i - 32) * (i - 32) + (j - 32) * (j - 32) :: Int)
+                            (_, _, _)   -> 0
+                      | i <- [0 .. 63] , 
+                        j <- [0 .. 63] ,
+                        k <- [0 .. 3]  
+                      ]
 
 
 main :: IO ()
@@ -47,20 +62,35 @@ main = do
 
     withImage nanovg "resources/image.jpg" [FlipY] $ \case
         Nothing    -> putStrLn "Couldn't load image... Exiting!" 
-        Just image -> do
-                size       <- withContext nanovg $ imageSize image
+        Just image -> withImageRGBA nanovg (V2 64 64) imageData [] $ \image2 -> do
+                size1       <- withContext nanovg $ imageSize image
+                size2       <- withContext nanovg $ imageSize image2
                 imagePaint <- withContext nanovg $ 
                                 imagePattern 
-                                    0 (fromIntegral <$> size) 
+                                    0 (fromIntegral <$> size2) 
                                     0 1 
                                     image
+
+                image2Paint <- withContext nanovg $ 
+                                    imagePattern 
+                                        0 (fromIntegral <$> size2) 
+                                        0 1 
+                                        image2
 
                 let render = do
                         glClear $ GL_COLOR_BUFFER_BIT
                         frame nanovg windowResolution $ do
-                                rect (V2 0 0) (V2 50 50)
-                                fillPaint imagePaint
-                                fill     
+                                withPath False $ do
+                                    rect (V2 0 0) (V2 50 50)
+                                    fillPaint imagePaint
+                                    fill     
+
+                                withPath False $ do
+                                    translate $ V2 50 50
+                                    rect (V2 0 0) $ fromIntegral <$> size2
+                                    fillPaint image2Paint
+                                    -- fillColor $ Color 1 0 0 1
+                                    fill     
 
                 let appLoop = do
                         render
