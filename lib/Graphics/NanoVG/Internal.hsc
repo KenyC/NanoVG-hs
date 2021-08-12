@@ -50,6 +50,12 @@ foreign import ccall unsafe "nanovg.h nvgRect"
 foreign import ccall unsafe "nanovg.h nvgStroke"
     c_stroke :: Ptr ()
              -> IO ()
+
+foreign import ccall unsafe "nanovg.h nvgStrokeWidth"
+    c_strokeWidth :: Ptr ()
+                  -> CFloat
+                  -> IO ()
+
 foreign import ccall unsafe "nanovg.h nvgFill"
     c_fill :: Ptr ()
            -> IO ()

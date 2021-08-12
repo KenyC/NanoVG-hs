@@ -15,24 +15,3 @@ data Color = Color {
 } deriving (Eq, Show)
 
 
--- | Sets color of filling  
-fillColor :: Color
-          -> VG ()
-fillColor Color{..} = 
-    applyContext $ \ptr ->
-        c_fillColor ptr 
-        (realToFrac _red) 
-        (realToFrac _green) 
-        (realToFrac _blue) 
-        (realToFrac _alpha)
-
--- | Sets color of strokes
-strokeColor :: Color
-            -> VG ()
-strokeColor Color{..} = 
-    applyContext $ \ptr ->
-        c_strokeColor ptr 
-        (realToFrac _red) 
-        (realToFrac _green) 
-        (realToFrac _blue) 
-        (realToFrac _alpha)
