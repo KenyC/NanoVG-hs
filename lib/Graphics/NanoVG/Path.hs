@@ -3,9 +3,9 @@ module Graphics.NanoVG.Path where
 
 import Control.Monad
 import Linear.V2
+import Linear.V4
 import Foreign.ForeignPtr
 
-import Graphics.NanoVG.Internal (c_rect)
 import Graphics.NanoVG.Internal.Path
 import Graphics.NanoVG.Context
 
@@ -96,3 +96,84 @@ rect
         c_rect ptr 
             (realToFrac x) (realToFrac y) 
             (realToFrac w) (realToFrac h)
+
+-- | Adds a rounded rectangle to the current path
+roundedRect :: V2 Float -- ^ position of top-left corner
+            -> V2 Float -- ^ dimensions (width, height)
+            -> Float    -- ^ radius of corner
+            -> VG ()
+roundedRect
+    (V2 x y)
+    (V2 w h)
+    radius  =
+    applyContext $ \ptr -> 
+        c_roundedRect ptr 
+            (realToFrac x) (realToFrac y) 
+            (realToFrac w) (realToFrac h)
+            (realToFrac radius)
+
+
+
+-- | Adds a rounded rectangle with different radii for each corner to the current path
+roundedRectVarying :: V2 Float -- ^ position of top-left corner
+                   -> V2 Float -- ^ dimensions (width, height)
+                   -> V4 Float -- ^ radius of corners in the order: top left, top right, bottom right, bottom left
+                   -> VG ()
+roundedRectVarying
+    (V2 x y)
+    (V2 w h)
+    (V4 tl tr br bl)  =
+    applyContext $ \ptr -> 
+        c_roundedRectVarying ptr 
+            (realToFrac x) (realToFrac y) 
+            (realToFrac w) (realToFrac h)
+            (realToFrac tl) (realToFrac tr) (realToFrac br) (realToFrac bl) 
+
+-- | Adds arc to current path
+arc :: V2 Float -- ^ position of arc center
+    -> Float    -- ^ radius of circle
+    -> Float    -- ^ initial angle
+    -> Float    -- ^ final angle
+    -> Bool     -- ^ true if clockwise
+    -> VG ()
+arc
+    (V2 centerX centerY)
+    radius
+    initialAngle
+    finalAngle
+    dir
+    =
+    applyContext $ \ptr -> 
+        c_arc ptr 
+            (realToFrac centerX) (realToFrac centerY) 
+            (realToFrac radius)
+            (realToFrac initialAngle) (realToFrac finalAngle)
+            (if dir then _clockwise else _counterClockwise)
+
+-- | Adds arc to current path
+ellipse :: V2 Float -- ^ position of center
+        -> Float    -- ^ radius on X
+        -> Float    -- ^ radius on Y
+        -> VG ()
+ellipse
+    (V2 centerX centerY)
+    radiusX
+    radiusY
+    =
+    applyContext $ \ptr -> 
+        c_ellipse ptr 
+            (realToFrac centerX) (realToFrac centerY) 
+            (realToFrac radiusX) (realToFrac radiusY) 
+
+-- | Adds arc to current path
+circle :: V2 Float -- ^ position of center
+       -> Float    -- ^ radius 
+       -> VG ()
+circle
+    (V2 centerX centerY)
+    radius
+    =
+    applyContext $ \ptr -> 
+        c_circle ptr 
+            (realToFrac centerX) (realToFrac centerY) 
+            (realToFrac radius)

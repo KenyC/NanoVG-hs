@@ -19,6 +19,7 @@ import Graphics.NanoVG
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Internal
 import Graphics.NanoVG.Internal.Paint
+import Graphics.NanoVG.Internal.Path  (c_rect)
 import Graphics.NanoVG.Internal.Image
 import Glew
 import Test

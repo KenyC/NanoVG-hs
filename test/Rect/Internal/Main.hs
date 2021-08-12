@@ -15,6 +15,7 @@ import Linear.V2
 
 import Graphics.NanoVG
 import Graphics.NanoVG.Context
+import Graphics.NanoVG.Internal.Path  (c_rect)
 import Graphics.NanoVG.Internal
 import Glew
 

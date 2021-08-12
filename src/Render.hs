@@ -67,6 +67,8 @@ drawGraph position@(V2 x y) dims@(V2 width height) time = do
             (Color 0 0.625 0.75 0)
             (Color 0 0.625 0.75 0.25)
 
+
+    ------------------- Background -----------------
     withPath False $ do
         curveLine
 
@@ -76,7 +78,8 @@ drawGraph position@(V2 x y) dims@(V2 width height) time = do
         fillPaint bgGradient
         fill
 
-                
+    ------------------- GRAPH LINE -----------------
+    strokeWidth 3
     translate $ 2 *^ unit _y
     withPath False $ do
         curveLine
@@ -89,6 +92,8 @@ drawGraph position@(V2 x y) dims@(V2 width height) time = do
         strokeColor $ Color 0 0.625 0.75 1
         stroke
 
+
+    ------------------- GRAPH POINTS -----------------
     forM_ coordinates $ \position -> do
         ptGrad <- radialGradient
                 (position + 2 *^ unit _y)
@@ -101,3 +106,6 @@ drawGraph position@(V2 x y) dims@(V2 width height) time = do
                 (V2 20 20)
             fillPaint ptGrad
             fill
+
+            
+    strokeWidth 1

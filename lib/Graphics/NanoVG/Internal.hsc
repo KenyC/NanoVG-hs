@@ -37,13 +37,6 @@ foreign import ccall unsafe "nanovg.h nvgEndFrame"
 
 ------------------- DRAW FUNCTIONS -----------------
 
-foreign import ccall unsafe "nanovg.h nvgRect"
-    c_rect :: Ptr ()
-           -> CFloat
-           -> CFloat
-           -> CFloat
-           -> CFloat
-           -> IO ()
 
 
 
