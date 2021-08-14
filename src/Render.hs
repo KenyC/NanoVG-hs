@@ -5,6 +5,7 @@ import Control.Monad
 --
 import Linear.V2
 import Linear.Vector
+import Linear.Metric
 --
 import Graphics.GL
 import Graphics.NanoVG
@@ -24,15 +25,17 @@ render :: NVGContext
 render context windowResolution WindowState{..} = do
     glClear GL_COLOR_BUFFER_BIT
     frame context windowResolution $  do
-        withPath False $ do
-            rect (V2 0 0) (V2 50 50)
-            fillColor $ Color 1 0 0 1
-            fill     
 
         let V2 width height = _size windowResolution
         drawGraph   
             (V2 0     (height/2))
             (V2 width (height/2))
+            time
+
+        drawEyes
+            (V2 (width - 250) 50)
+            (V2 150 100)
+            mousePosition
             time
 
 drawGraph :: V2 Float 
@@ -109,3 +112,115 @@ drawGraph position@(V2 x y) dims@(V2 width height) time = do
 
             
     strokeWidth 1
+
+
+drawEyes 
+    :: V2 Float
+    -> V2 Float
+    -> V2 Float
+    -> Float
+    -> VG ()
+drawEyes
+    position@(V2 x y)
+    dims@(V2 w h)
+    mousePosition@(V2 mx my)
+    time
+    = do
+
+        let eyeSize@(V2 ex ey) = V2 
+                               (w * 0.23)
+                               (h * 0.5)
+
+            leftEye@(V2 lx ly)  = position + eyeSize
+            rightEye@(V2 rx ry) = position + (V2 (w - ex) ey) 
+            br = min ex ey * 0.5
+                
+        ------------------- EYEBALL -----------------
+
+        bg <- linearGradient
+                (V2 x (y + h * 0.5))
+                (V2 (x + w * 0.1) (y + h))
+                (Color 0 0 0 0.125)
+                (Color 0 0 0 0.0625)
+
+        withPath False $ do
+            ellipse 
+                (leftEye + (V2 3 16))
+                ex ey
+            ellipse 
+                (rightEye + (V2 3 16))
+                ex ey
+            fillPaint bg
+            fill
+            
+        bg <- linearGradient
+                (position + (V2 0 0.25) * dims)
+                (position + (V2 0.1 1)  * dims)
+                (Color 0.86 0.86 0.86 1)
+                (Color 0.5  0.5  0.5  1)
+
+        withPath False $ do
+            ellipse 
+                (V2 lx ly)
+                ex ey
+            ellipse 
+                (V2 rx ry)
+                ex ey
+            fillPaint bg
+            fill
+        
+        ------------------- PUPILS -----------------
+
+        let blink = 1 - (sin $ 0.5 * time) ** 20 * 0.8
+
+        let unnormalizedDiff = (mousePosition - rightEye) / (10 * eyeSize)
+            normalizedDiff
+                | norm unnormalizedDiff > 1 = normalize unnormalizedDiff
+                | otherwise                 = unnormalizedDiff
+            closedEye = unnormalizedDiff * eyeSize * (V2 0.4 0.5)
+
+
+        fillColor $ Color 0.0625 0.0625 0.0625 1.0
+        withPath False $ do
+            ellipse
+                (rightEye + closedEye + (ey * 0.25 * (1 -blink)) *^ unit _y)
+                br
+                (br * blink)
+            fill
+
+        withPath False $ do
+            ellipse
+                (leftEye + closedEye + (ey * 0.25 * (1 -blink)) *^ unit _y)
+                br
+                (br * blink)
+            fill
+            -- diff
+            --     | normalize > 1
+
+        ------------------- GLOSS -----------------
+        gloss <- radialGradient 
+                    (leftEye - eyeSize * (V2 0.25 0.5))
+                    (ex * 0.1)
+                    (ex * 0.75)
+                    (Color 1 1 1 0.5)
+                    (Color 1 1 1 0)
+
+        withPath False $ do
+            ellipse leftEye ex ey
+            fillPaint gloss
+            fill
+
+        gloss <- radialGradient 
+                    (rightEye - eyeSize * (V2 0.25 0.5))
+                    (ex * 0.1)
+                    (ex * 0.75)
+                    (Color 1 1 1 0.5)
+                    (Color 1 1 1 0)
+
+
+        withPath False $ do
+            ellipse rightEye ex ey
+            fillPaint gloss
+            fill
+
+        return ()

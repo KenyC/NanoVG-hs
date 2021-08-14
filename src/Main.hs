@@ -45,20 +45,25 @@ main = do
     nvgContext <- nvgGL3Context [debug]
 
   
-    glClearColor 1 1 1 1
+    glClearColor 0.3 0.3 0.3 1
 
     let state = WindowState {
-        time = 0
+        time = 0,
+        mousePosition = 0
     }
 
     let appLoop currentState = do
 
             SDL.glSwapWindow $ window
             render nvgContext windowResolution currentState
-            events    <- SDL.pollEvents
-            time      <- SDL.ticks
+            events                 <- SDL.pollEvents
+            time                   <- SDL.ticks
+            SDL.P mousePosition    <- SDL.getAbsoluteMouseLocation
             SDL.delay 60
-            unless (any quitEvent events) $ appLoop $ currentState {time = (fromIntegral time) / 1000}
+            unless (any quitEvent events) $ appLoop $ currentState {
+                time = (fromIntegral time) / 1000,
+                mousePosition = fromIntegral <$> mousePosition
+            }
 
     appLoop state
     SDL.destroyWindow window
