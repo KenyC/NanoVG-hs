@@ -222,3 +222,16 @@ executable ImageInternal
     text,
     linear
   default-language:    Haskell2010
+
+test-suite Color
+  hs-source-dirs:      test/Color
+  main-is:             Main.hs
+  type:                exitcode-stdio-1.0
+  build-depends:       
+    NanoVG,
+    base >=4.13 && <4.14,
+    OpenGLRaw,
+    tasty,
+    tasty-hunit,
+    tasty-quickcheck
+  default-language:    Haskell2010
