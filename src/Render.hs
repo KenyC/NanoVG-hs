@@ -38,6 +38,11 @@ render context windowResolution WindowState{..} = do
             mousePosition
             time
 
+        drawColorwheel 
+            (V2 (width - 300) (height -300))
+            (V2 250 250)
+            time
+
 drawGraph :: V2 Float 
           -> V2 Float
           -> Float
@@ -224,3 +229,136 @@ drawEyes
             fill
 
         return ()
+
+
+drawColorwheel :: V2 Float
+               -> V2 Float
+               -> Float
+               -> VG ()
+drawColorwheel position dims time = do
+    let hue    = sin $ 0.12 * time
+        center = position + 0.5 * dims
+        outerRadius = (minimum dims) * 0.5 - 5 :: Float
+        innerRadius = outerRadius - 20
+        halfPixel   = 0.5 / outerRadius
+
+    save
+
+    forM_ [0 .. 5] $ \i -> do
+        let beginArc = i       / 6  * 2 * pi - halfPixel :: Float
+            endArc   = (i + 1) / 6  * 2 * pi - halfPixel
+        withPath True $ do
+            arc
+                center outerRadius
+                beginArc endArc
+                True
+            arc
+                center innerRadius
+                endArc beginArc
+                False
+
+        let startPos = center + (innerRadius + outerRadius) / 2 *^ (V2 (cos beginArc) (sin beginArc))
+            endPos   = center + (innerRadius + outerRadius) / 2 *^ (V2 (cos endArc)   (sin endArc))
+
+        gradient <- linearGradient
+                        startPos endPos
+                        (fromHSLA (beginArc / (2 * pi)) 1 0.55 1)
+                        (fromHSLA (endArc   / (2 * pi)) 1 0.55 1)
+                        -- (Color 1 0 0 1)
+                        -- (Color 0 1 0 1)
+        fillPaint gradient
+        fill
+
+    withPath False $ do
+        circle center $ innerRadius - 0.5
+        circle center $ outerRadius + 0.5
+        strokeColor $ Color 0 0 0 0.25
+        strokeWidth 1
+        stroke
+
+    save
+
+    ------------------- MARKER -----------------
+    translate center
+    rotate $ hue * 2 * pi
+    strokeWidth 2
+    withPath False $ do
+        rect
+            (V2 (innerRadius - 1)               (-3))
+            (V2 (outerRadius - innerRadius + 2) 6   )
+        strokeColor $ fromRGBA 255 255 255 192
+        stroke
+
+    gradient <- boxGradient 
+                    (V2 (innerRadius - 3)               (-5))
+                    (V2 (outerRadius - innerRadius + 6) 10  )
+                    2 4
+                    (fromRGBA 0 0 0 128)
+                    (fromRGBA 0 0 0 0  )
+    withPath False $ do
+        rect 
+            (V2 (innerRadius - 2 - 10)               (- 4 - 10))
+            (V2 (outerRadius - innerRadius + 4 + 20) (8 + 20))
+        rect 
+            (V2 (innerRadius - 2)               (-4))
+            (V2 (outerRadius - innerRadius + 4) 8   )
+
+        fillPaint gradient
+        fill
+
+    ------------------- COLOR TRIANGLE -----------------
+
+    let sizeTriangle = innerRadius - 6
+        pointA       = sizeTriangle *^ (angle $ 120/180 * pi)
+        pointB       = sizeTriangle *^ (angle $ - 120/180 * pi)
+        pointC       = V2 sizeTriangle 0
+
+    withPath True $ do
+        moveTo pointC 
+        lineTo pointA
+        lineTo pointB
+
+    paint <- linearGradient 
+                    pointC
+                    pointA
+                    (fromHSLA hue 1 0.5 1)
+                    (Color 1 1 1 1)
+    fillPaint paint
+    fill
+
+
+    paint <- linearGradient 
+                    ((pointC + pointA) / 2)
+                    pointB
+                    (Color 0 0 0 0)
+                    (Color 0 0 0 1)
+    fillPaint paint
+    fill
+
+    strokeColor $ fromRGBA 0 0 0 64
+    stroke
+
+    ------------------- SELECT CIRCLE ON TRIANGLE -----------------
+
+    let selectPos = pointA * (V2 0.3 0.4)
+    strokeWidth 2
+    withPath False $ do
+        circle selectPos 5
+        strokeColor $ fromRGBA 255 255 255 192
+        stroke
+
+    paint <- radialGradient
+                selectPos
+                7 9
+                (fromRGBA 0 0 0 64)
+                (fromRGBA 0 0 0 0)
+    withPath False $ do
+        rect
+            (selectPos - 20)
+            40
+        circle selectPos 7
+        fillPaint paint
+        fill
+
+    restore
+    restore
