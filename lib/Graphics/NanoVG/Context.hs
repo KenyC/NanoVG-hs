@@ -60,6 +60,15 @@ save = applyContext c_save
 restore :: VG ()
 restore = applyContext c_restore
 
+-- | Executes all commands in scope argument in new default drawing state. Previous drawing state is restored upon exit of the scope argument.
+withNewState :: VG a  -- ^ Scope to be executed in new default drawing state
+             -> VG a
+withNewState cont = do
+    save
+    toReturn <- cont
+    restore
+    return toReturn
+
 -- | Resets drawing state to default initial values
 reset :: VG ()
 reset = applyContext c_reset
