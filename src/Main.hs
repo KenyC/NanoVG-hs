@@ -17,6 +17,7 @@ import Graphics.NanoVG
 import Render
 import WindowState
 import Glew
+import qualified FpsWidget as Fps
 
 
 quitEvent :: SDL.Event -> Bool
@@ -49,7 +50,8 @@ main = do
 
     let state = WindowState {
         time = 0,
-        mousePosition = 0
+        mousePosition = 0,
+        graph = Fps.emptyGraph
     }
 
     let appLoop currentState = do
@@ -58,11 +60,18 @@ main = do
             render nvgContext windowResolution currentState
             events                 <- SDL.pollEvents
             time                   <- SDL.ticks
+
+            let newTime   = (fromIntegral time) / 1000 
+                frameTime = newTime - WindowState.time currentState
+                newGraph  = Fps.updateGraph (graph currentState) $ frameTime * 1000
+
+
             SDL.P mousePosition    <- SDL.getAbsoluteMouseLocation
             SDL.delay 60
             unless (any quitEvent events) $ appLoop $ currentState {
-                time = (fromIntegral time) / 1000,
-                mousePosition = fromIntegral <$> mousePosition
+                  time          = newTime
+                , mousePosition = fromIntegral <$> mousePosition
+                , graph         = newGraph
             }
 
     appLoop state

@@ -15,6 +15,8 @@ import Graphics.NanoVG.Path
 import Graphics.NanoVG.Paint
 import Graphics.NanoVG.Color
 import Graphics.NanoVG.Transform
+--
+import qualified FpsWidget as Fps
 
 import WindowState
 
@@ -42,6 +44,9 @@ render context windowResolution WindowState{..} = do
             (V2 (width - 300) (height -300))
             (V2 250 250)
             time
+
+        Fps.drawGraph graph 0
+
 
 drawGraph :: V2 Float 
           -> V2 Float
