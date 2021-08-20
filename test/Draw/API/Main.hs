@@ -20,6 +20,7 @@ import Graphics.NanoVG.Context
 import Graphics.NanoVG.Draw
 import Graphics.NanoVG.Path
 import Graphics.NanoVG.Image
+import Graphics.NanoVG.Scissor
 import Graphics.NanoVG.Transform
 import Graphics.NanoVG.Paint
 import Glew
@@ -62,6 +63,23 @@ main = do
             glClear GL_COLOR_BUFFER_BIT
             frame nanovg windowResolution $ do
                 drawLines
+
+                translate $ V2 800 500
+                scissor 0 $ V2 20 100
+                withPath False $ circle 0 50
+                fillColor $ Color 1 0 0 1
+                fill
+
+                intersectScissor 10 $ V2 20 100
+                withPath False $ circle 0 50
+                fillColor $ Color 0 1 0 1
+                fill
+
+                resetScissor
+                withPath False $ circle 0 20
+                fillColor $ Color 0 0 1 1
+                fill
+
 
                 -- draw2Rects    
 

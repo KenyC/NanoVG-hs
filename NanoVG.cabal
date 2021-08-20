@@ -32,14 +32,16 @@ library
     Graphics.NanoVG.Draw
     Graphics.NanoVG.Image
     Graphics.NanoVG.Internal
+    Graphics.NanoVG.Internal.Draw
     Graphics.NanoVG.Internal.Image
     Graphics.NanoVG.Internal.Paint
     Graphics.NanoVG.Internal.Path
+    Graphics.NanoVG.Internal.Scissor
     Graphics.NanoVG.Internal.State
-    Graphics.NanoVG.Internal.Draw
     Graphics.NanoVG.Internal.Transform
     Graphics.NanoVG.Paint
     Graphics.NanoVG.Path
+    Graphics.NanoVG.Scissor
     Graphics.NanoVG.Transform
     Test
   build-depends:
