@@ -46,7 +46,9 @@ main = do
     glewInit
 
     nvgContext <- nvgGL3Context [debug]
-    Just font  <- withContext nvgContext $ createFont "resources/Roboto-Regular.ttf"
+    Just normalFont  <- withContext nvgContext $ createFont "resources/Roboto-Regular.ttf"
+    Just boldFont    <- withContext nvgContext $ createFont "resources/Roboto-Bold.ttf"
+    Just iconFont    <- withContext nvgContext $ createFont "resources/entypo.ttf"
   
     glClearColor 0.3 0.3 0.3 1
 
@@ -54,7 +56,9 @@ main = do
         time = 0,
         mousePosition = 0,
         graph = Fps.emptyGraph,
-        font  = font
+        normalFont  = normalFont,
+        boldFont    = boldFont,
+        iconFont    = iconFont
     }
 
     let appLoop currentState = do

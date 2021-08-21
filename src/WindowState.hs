@@ -5,8 +5,10 @@ import FpsWidget
 import Graphics.NanoVG.Text
 
 data WindowState = WindowState {
-    time :: !Float,
+    time          :: !Float,
     mousePosition :: !(V2 Float),
-    graph :: !FpsGraph,
-    font  :: !Font
+    graph         :: !FpsGraph,
+    boldFont      :: !Font,
+    normalFont    :: !Font,
+    iconFont      :: !Font
 }

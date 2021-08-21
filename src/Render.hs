@@ -25,6 +25,8 @@ import Graphics.NanoVG.Transform
 import qualified FpsWidget as Fps
 
 import WindowState
+import Widgets
+import Icons
 
 render :: NVGContext 
        -> WindowResolution
@@ -56,9 +58,34 @@ render context windowResolution WindowState{..} = do
             (V2 600 50)
             time
 
-        drawWindow "Widgets `n Stuff" (V2 50 50) (V2 300 400)
+        drawWindow "Widgets `n Stuff" boldFont (V2 50 50) (V2 300 400)
 
-        Fps.drawGraph graph 0 font
+        let posSearchBox = V2 60 95
+        drawSearchBox "Search" normalFont iconFont posSearchBox (V2 280 25)
+
+        let posDropDown  = posSearchBox + V2 0 40
+        drawDropDown "Effects" normalFont iconFont posDropDown (V2 280 28)
+
+        let popY          = posDropDown + V2 0 14
+        let posLabelForm  = posDropDown + V2 0 45
+        drawLabel "Login" normalFont posLabelForm (V2 200 20)
+
+        let posEmail = posLabelForm + V2 0 25
+        drawEditBox "Email" normalFont posEmail (V2 280 28)
+
+        let posPassword = posEmail + V2 0 35
+        drawEditBox "Password" normalFont posPassword (V2 280 28)
+
+        let posCheckBox = posPassword + V2 0 38
+        drawCheckBox "Remember me" normalFont iconFont posCheckBox (V2 140 28)
+        drawButton 
+            (Just iconLogin) "Sign in" 
+            normalFont iconFont 
+            (posCheckBox + V2 138 0) (V2 140 28) 
+            (fromRGBA 0 96 128 255)
+
+
+        Fps.drawGraph graph 0 normalFont
 
 
 drawGraph :: V2 Float 
@@ -321,6 +348,7 @@ drawColorwheel position dims time = do
             (V2 (innerRadius - 2)               (-4))
             (V2 (outerRadius - innerRadius + 4) 8   )
 
+        pathWinding Hole
         fillPaint gradient
         fill
 
@@ -428,10 +456,11 @@ drawLines position dims@(V2 width height) time = do
 
 
 drawWindow :: ByteString
-          ->  V2 Float
-          ->  V2 Float
-          ->  VG ()
-drawWindow title pos dims@(V2 width height) = do
+           -> Font
+           -> V2 Float
+           -> V2 Float
+           -> VG ()
+drawWindow title font pos dims@(V2 width height) = do
     let cornerRadius = 3
     withNewState $ do
         translate pos
@@ -477,7 +506,7 @@ drawWindow title pos dims@(V2 width height) = do
             
         -- header label
         fontSize 15
-        -- fontFace font
+        fontFace font
         textAlign $ Align CenterAlign Middle
 
         fontBlur 2

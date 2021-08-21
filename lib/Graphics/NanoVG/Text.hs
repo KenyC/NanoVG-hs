@@ -15,7 +15,9 @@ module Graphics.NanoVG.Text (
     byteString,
     byteStringBox,
     textBounds,
-    textBoxBounds
+    textBoxBounds,
+    byteStringBounds,
+    byteStringBoxBounds
 ) where
 
 import Foreign.Ptr
@@ -183,7 +185,7 @@ byteStringBox (V2 x y) width contents = applyContext $ \ptr ->
 
 
 
--- | Returns position and size of the smallest box containing the text written by the corresponding call to 'text' or 'byteString'.
+-- | Returns position and size of the smallest box containing the text written by the corresponding call to 'text'.
 textBounds :: V2 Float                -- ^ text position
            -> Text                    -- ^ text
            -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
@@ -201,13 +203,52 @@ textBounds (V2 x y) text = applyContext $ \ptr -> do
             return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
 
 
--- | Returns position and size of the smallest box containing the text written by the corresponding call to 'textBox' or 'byteStringBox'.
+-- | Returns position and size of the smallest box containing the text written by the corresponding call to 'textBox'.
 textBoxBounds :: V2 Float                -- ^ text position
               -> Float                   -- ^ width
               -> Text                    -- ^ text
               -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
 textBoxBounds (V2 x y) width text = applyContext $ \ptr -> do
     Text.withCStringLen text $ \(contentsC, size) -> do
+        withArray [0, 0, 0, 0] $ \bounds -> do
+            c_textBoxBounds
+                ptr 
+                (realToFrac x) (realToFrac y)
+                (realToFrac width)
+                contentsC
+                (plusPtr contentsC $ size * sizeOf (undefined :: CChar))    
+                bounds
+            boundsList <- peekArray 4 bounds 
+            let xMin:yMin:xMax:yMax:_ = map realToFrac boundsList
+            return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
+
+
+
+-- | Returns position and size of the smallest box containing the text written by the corresponding call to 'byteString'.
+byteStringBounds :: V2 Float                -- ^ text position
+                 -> ByteString              -- ^ text
+                 -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
+byteStringBounds (V2 x y) text = applyContext $ \ptr -> do
+    BS.unsafeUseAsCStringLen text $ \(contentsC, size) -> do
+        withArray [0, 0, 0, 0] $ \bounds -> do
+            c_textBounds
+                ptr 
+                (realToFrac x) (realToFrac y)
+                contentsC
+                (plusPtr contentsC $ size * sizeOf (undefined :: CChar))    
+                bounds
+            boundsList <- peekArray 4 bounds 
+            let xMin:yMin:xMax:yMax:_ = map realToFrac boundsList
+            return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
+
+
+-- | Returns position and size of the smallest box containing the text written by the corresponding call to 'textBox'.
+byteStringBoxBounds :: V2 Float                -- ^ text position
+                    -> Float                   -- ^ width
+                    -> ByteString              -- ^ text
+                    -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
+byteStringBoxBounds (V2 x y) width text = applyContext $ \ptr -> do
+    BS.unsafeUseAsCStringLen text $ \(contentsC, size) -> do
         withArray [0, 0, 0, 0] $ \bounds -> do
             c_textBoxBounds
                 ptr 
