@@ -77,7 +77,7 @@ main = do
                             -- Centered paragraph
                             fillColor (Color 0 0 1 1)
                             textAlign $ Align CenterAlign Baseline
-                            textBox 
+                            byteStringBox 
                                 (V2 80 40) 
                                 60
                                 "Aloha !fezfezf ezfez fezf ezfez"
@@ -87,7 +87,7 @@ main = do
                             textAlign $ Align LeftAlign Baseline
                             textLineHeight    1.25
                             textLetterSpacing 5
-                            textBox 
+                            byteStringBox 
                                 (V2 30 80) 
                                 60
                                 "Aloha !fezfezf ezfez fezf ezfez"

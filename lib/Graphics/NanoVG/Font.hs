@@ -11,6 +11,8 @@ module Graphics.NanoVG.Font (
     textLineHeight,
     text,
     textBox,
+    byteString,
+    byteStringBox,
     textBounds,
     textBoxBounds
 ) where
@@ -25,6 +27,8 @@ import Linear.V2
 --
 import Data.Text (Text)
 import qualified Data.Text.Foreign as Text
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Unsafe as BS
 import Data.Bits ((.|.))
 
 import Graphics.NanoVG.Context
@@ -34,7 +38,7 @@ import Graphics.NanoVG.Internal.Font
 
 
 -- | Data type for fonts
-data Font = Font {
+newtype Font = Font {
     _fontId :: CInt
 } deriving (Show)
 
@@ -125,6 +129,19 @@ text (V2 x y) contents = applyContext $ \ptr ->
             contentsC
             (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
 
+-- | Writes text UTF-8 encoded as ByteString at given location. ByteString equivalent for 'text'. 
+--   This function is more efficient as it does not involve copying data.
+byteString :: V2 Float   -- ^ where to write text
+           -> ByteString -- ^ what to write  (ByteString representing text as UTF-8)
+           -> VG Float   -- ^ horizontal advance of text (i.e. where a potential next character should be drawn)
+byteString (V2 x y) contents = applyContext $ \ptr -> 
+    BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
+        realToFrac <$> c_text 
+            ptr 
+            (realToFrac x) (realToFrac y)
+            contentsC
+            (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
+
 
 -- | Writes text at given location. If text is longer than provided width, text is broken in multiple lines at word boundaries. 
 --   If this is not possible because some word is longer than width, this word is broken at the character nearest to end of the line.
@@ -141,7 +158,25 @@ textBox (V2 x y) width contents = applyContext $ \ptr ->
             contentsC
             (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
 
--- | Returns position and size of the smallest box containing the text written by the corresponding call to 'text'.
+
+-- | Writes text UTF-8 encoded as ByteString at given location. ByteString equivalent for 'textBox'. 
+--   This function is more efficient as it does not involve copying data.
+byteStringBox :: V2 Float   -- ^ where to write text
+              -> Float      -- ^ width of text
+              -> ByteString -- ^ what to write (ByteString representing text as UTF-8)
+              -> VG ()
+byteStringBox (V2 x y) width contents = applyContext $ \ptr -> 
+    BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
+        c_textBox
+            ptr 
+            (realToFrac x) (realToFrac y)
+            (realToFrac width)
+            contentsC
+            (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
+
+
+
+-- | Returns position and size of the smallest box containing the text written by the corresponding call to 'text' or 'byteString'.
 textBounds :: V2 Float                -- ^ text position
            -> Text                    -- ^ text
            -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
@@ -159,7 +194,7 @@ textBounds (V2 x y) text = applyContext $ \ptr -> do
             return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
 
 
--- | Returns position and size of the smallest box containing the text written by the corresponding call to 'text'.
+-- | Returns position and size of the smallest box containing the text written by the corresponding call to 'textBox' or 'byteStringBox'.
 textBoxBounds :: V2 Float                -- ^ text position
               -> Float                   -- ^ width
               -> Text                    -- ^ text

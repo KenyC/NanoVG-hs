@@ -50,8 +50,8 @@ library
     base >=4.13 && <4.14,
     mtl,
     bytestring,
-    linear,
-    text
+    text,
+    linear
   default-language:    Haskell2010
   extra-libraries:     nanovg, testy, GL, GLEW
   -- include-dirs:        ${pkgroot}/nanovg/include/
