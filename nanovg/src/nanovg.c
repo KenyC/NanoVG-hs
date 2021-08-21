@@ -2469,6 +2469,7 @@ static int nvg__isTransformFlipped(const float *xform)
 
 float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char* end)
 {
+	LOG("BHDT Font1!\n");
 	NVGstate* state = nvg__getState(ctx);
 	FONStextIter iter, prevIter;
 	FONSquad q;
@@ -2479,10 +2480,13 @@ float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char*
 	int nverts = 0;
 	int isFlipped = nvg__isTransformFlipped(state->xform);
 
+	LOG("%f %f %p %p\n", x, y, string, end);
 	if (end == NULL)
 		end = string + strlen(string);
 
+
 	if (state->fontId == FONS_INVALID) return x;
+	LOG("---\n");
 
 	fonsSetSize(ctx->fs, state->fontSize*scale);
 	fonsSetSpacing(ctx->fs, state->letterSpacing*scale);
@@ -2493,6 +2497,7 @@ float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char*
 	cverts = nvg__maxi(2, (int)(end - string)) * 6; // conservative estimate.
 	verts = nvg__allocTempVerts(ctx, cverts);
 	if (verts == NULL) return x;
+	LOG("---\n");
 
 	fonsTextIterInit(ctx->fs, &iter, x*scale, y*scale, string, end, FONS_GLYPH_BITMAP_REQUIRED);
 	prevIter = iter;
@@ -2510,6 +2515,7 @@ float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char*
 			if (iter.prevGlyphIndex == -1) // still can not find glyph?
 				break;
 		}
+		LOG("-*-\n");
 		prevIter = iter;
 		if(isFlipped) {
 			float tmp;

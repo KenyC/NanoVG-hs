@@ -111,6 +111,8 @@ NVGpaint* nvgRadialGradientHs(
 }
 
 
+char _defaultFontName[5] = "font\0";
+
 #ifndef RELEASE
 void printNvgPaint(NVGpaint* paint) {
 	LOG("%p\n", paint);

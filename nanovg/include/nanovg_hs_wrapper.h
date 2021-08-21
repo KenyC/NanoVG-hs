@@ -20,6 +20,9 @@ void nvgStrokeColorHs(
 );
 
 
+extern char _defaultFontName[5];
+
+
 // -- Paint wrappers
 void nvgStrokePaintHs(NVGcontext* ctx, NVGpaint *paint);
 void nvgFillPaintHs(NVGcontext* ctx, NVGpaint *paint);

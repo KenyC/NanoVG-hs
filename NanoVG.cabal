@@ -30,9 +30,11 @@ library
     Graphics.NanoVG.Color
     Graphics.NanoVG.Context
     Graphics.NanoVG.Draw
+    Graphics.NanoVG.Font
     Graphics.NanoVG.Image
     Graphics.NanoVG.Internal
     Graphics.NanoVG.Internal.Draw
+    Graphics.NanoVG.Internal.Font
     Graphics.NanoVG.Internal.Image
     Graphics.NanoVG.Internal.Paint
     Graphics.NanoVG.Internal.Path
@@ -48,7 +50,8 @@ library
     base >=4.13 && <4.14,
     mtl,
     bytestring,
-    linear
+    linear,
+    text
   default-language:    Haskell2010
   extra-libraries:     nanovg, testy, GL, GLEW
   -- include-dirs:        ${pkgroot}/nanovg/include/
@@ -199,6 +202,36 @@ executable Transform
 
 executable TransformInternal
   hs-source-dirs:      test/Transform/Internal
+  main-is:             Main.hs
+  other-modules:       Glew
+  -- other-extensions:
+  build-depends:       
+    NanoVG,
+    -- glew,
+    base >=4.13 && <4.14,
+    sdl2,
+    OpenGLRaw,
+    text,
+    linear
+  default-language:    Haskell2010
+
+executable Font
+  hs-source-dirs:      test/Font/API/
+  main-is:             Main.hs
+  other-modules:       Glew
+  -- other-extensions:
+  build-depends:       
+    NanoVG,
+    -- glew,
+    base >=4.13 && <4.14,
+    sdl2,
+    OpenGLRaw,
+    text,
+    linear
+  default-language:    Haskell2010
+
+executable FontInternal
+  hs-source-dirs:      test/Font/Internal
   main-is:             Main.hs
   other-modules:       Glew
   -- other-extensions:
