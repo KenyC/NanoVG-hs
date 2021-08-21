@@ -30,11 +30,11 @@ library
     Graphics.NanoVG.Color
     Graphics.NanoVG.Context
     Graphics.NanoVG.Draw
-    Graphics.NanoVG.Font
+    Graphics.NanoVG.Text
     Graphics.NanoVG.Image
     Graphics.NanoVG.Internal
     Graphics.NanoVG.Internal.Draw
-    Graphics.NanoVG.Internal.Font
+    Graphics.NanoVG.Internal.Text
     Graphics.NanoVG.Internal.Image
     Graphics.NanoVG.Internal.Paint
     Graphics.NanoVG.Internal.Path
@@ -215,8 +215,8 @@ executable TransformInternal
     linear
   default-language:    Haskell2010
 
-executable Font
-  hs-source-dirs:      test/Font/API/
+executable Text
+  hs-source-dirs:      test/Text/API/
   main-is:             Main.hs
   other-modules:       Glew
   -- other-extensions:
@@ -230,8 +230,8 @@ executable Font
     linear
   default-language:    Haskell2010
 
-executable FontInternal
-  hs-source-dirs:      test/Font/Internal
+executable TextInternal
+  hs-source-dirs:      test/Text/Internal
   main-is:             Main.hs
   other-modules:       Glew
   -- other-extensions:

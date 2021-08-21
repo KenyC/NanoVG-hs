@@ -1,4 +1,4 @@
-module Graphics.NanoVG.Internal.Font where
+module Graphics.NanoVG.Internal.Text where
 
 import Foreign.C.Types
 import Foreign.Ptr

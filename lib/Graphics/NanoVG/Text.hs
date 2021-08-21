@@ -1,4 +1,4 @@
-module Graphics.NanoVG.Font (
+module Graphics.NanoVG.Text (
     Font(..),
     createFont,
     fontFace,
@@ -34,7 +34,7 @@ import Data.Bits ((.|.))
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Color
 import Graphics.NanoVG.Internal
-import Graphics.NanoVG.Internal.Font
+import Graphics.NanoVG.Internal.Text
 
 
 -- | Data type for fonts

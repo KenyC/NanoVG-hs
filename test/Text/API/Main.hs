@@ -17,7 +17,7 @@ import Data.Text (Text)
 import Graphics.NanoVG
 import Graphics.NanoVG.Color
 import Graphics.NanoVG.Context
-import Graphics.NanoVG.Font
+import Graphics.NanoVG.Text
 import Graphics.NanoVG.Draw
 import Graphics.NanoVG.Path
 import Glew
