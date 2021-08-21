@@ -61,6 +61,17 @@ foreign import ccall unsafe "nanovg.h nvgClosePath"
     c_closePath :: Ptr () -> IO ()
 
 
+
+#{enum CInt,
+    , _solid = NVG_SOLID 
+    , _hole  = NVG_HOLE  
+}
+
+foreign import ccall unsafe "nanovg.h nvgPathWinding"
+    -- | Sets the current sub-path winding, see NVGwinding and NVGsolidity.
+    c_pathWinding :: Ptr () -> CInt -> IO ()
+
+
 foreign import ccall unsafe "nanovg.h nvgArc"
     -- | Creates new circle arc shaped sub-path. The arc center is at cx,cy, the arc radius is r,
     --   and the arc is drawn from angle a0 to a1, and swept in direction dir (NVG_CCW, or NVG_CW).

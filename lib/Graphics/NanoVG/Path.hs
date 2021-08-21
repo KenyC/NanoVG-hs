@@ -5,6 +5,7 @@ import Control.Monad
 import Linear.V2
 import Linear.V4
 import Foreign.ForeignPtr
+import Foreign.C.Types
 
 import Graphics.NanoVG.Internal.Path
 import Graphics.NanoVG.Context
@@ -27,6 +28,16 @@ withPath closed cont = do
 
 
 
+data PathWinding = Solid
+                 | Hole
+                 deriving (Eq, Show)
+
+pathWindingToCint :: PathWinding -> CInt
+pathWindingToCint Solid = _solid
+pathWindingToCint Hole  = _hole
+
+pathWinding :: PathWinding -> VG ()
+pathWinding winding = applyContext $ \ptr -> c_pathWinding ptr (pathWindingToCint winding)
 
 
 -- | Adds a line from current position to the position given as argument to the current path 

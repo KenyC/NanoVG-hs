@@ -1,8 +1,12 @@
 {-# LANGUAGE RecordWildCards     #-}
+{-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Render where
 
 import Control.Monad
+--
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
 --
 import Linear.V2
 import Linear.Vector
@@ -15,6 +19,7 @@ import Graphics.NanoVG.Draw
 import Graphics.NanoVG.Path
 import Graphics.NanoVG.Paint
 import Graphics.NanoVG.Color
+import Graphics.NanoVG.Text
 import Graphics.NanoVG.Transform
 --
 import qualified FpsWidget as Fps
@@ -50,6 +55,8 @@ render context windowResolution WindowState{..} = do
             (V2 120 (height - 50))
             (V2 600 50)
             time
+
+        drawWindow "Widgets `n Stuff" (V2 50 50) (V2 300 400)
 
         Fps.drawGraph graph 0 font
 
@@ -420,3 +427,69 @@ drawLines position dims@(V2 width height) time = do
                         stroke
 
 
+drawWindow :: ByteString
+          ->  V2 Float
+          ->  V2 Float
+          ->  VG ()
+drawWindow title pos dims@(V2 width height) = do
+    let cornerRadius = 3
+    withNewState $ do
+        translate pos
+
+        -- window frame
+        withPath Open $ do
+            roundedRect 0 dims cornerRadius
+            fillColor $ fromRGBA 28 30 34 192
+            fill
+
+        -- drop shadow
+        shadowPaint <- boxGradient 
+                (V2 0 2) dims 
+                (cornerRadius * 2)
+                10
+                (fromRGBA 0 0 0 128)
+                (fromRGBA 0 0 0 0)
+        withPath Open $ do
+            rect (-10) (dims + V2 20 30)
+            roundedRect 0 dims cornerRadius
+            pathWinding Hole
+            fillPaint shadowPaint
+            fill
+
+        -- header
+        headerPaint <- linearGradient 0 (V2 0 15)
+                            (fromRGBA 255 255 255 8 )
+                            (fromRGBA 0   0   0   16)
+        withPath Open $ do
+            roundedRect 
+                1
+                (V2 (width - 2) 30)
+                (cornerRadius - 1)
+            fillPaint headerPaint
+            fill
+
+        withPath Open $ do
+            let start = 0.5 + V2 0 30
+            moveTo start 
+            lineTo $ start + V2 (width - 1) 0
+            strokeColor $ fromRGBA 0 0 0 32
+            stroke
+            
+        -- header label
+        fontSize 15
+        -- fontFace font
+        textAlign $ Align CenterAlign Middle
+
+        fontBlur 2
+        fillColor $ fromRGBA 0 0 0 128
+        byteString 
+            (V2 (width / 2) (16 + 1))
+            title
+
+        fontBlur 0
+        fillColor $ fromRGBA 220 220 220 160
+        byteString 
+            (V2 (width / 2) (16 + 1))
+            title
+
+        return ()

@@ -75,6 +75,7 @@ executable demo
     sdl2,
     OpenGLRaw,
     text,
+    bytestring,
     vector,
     linear
   default-language:    Haskell2010

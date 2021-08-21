@@ -1,6 +1,7 @@
 module Graphics.NanoVG.Text (
     Font(..),
     createFont,
+    fontBlur,
     fontFace,
     fontSize,
     HAlign(..),
@@ -63,6 +64,12 @@ fontFace (Font fontId) = applyContext $ \ptr -> c_fontFaceId ptr fontId
 fontSize :: Float -- ^ size
          -> VG ()
 fontSize size = applyContext $ \ptr -> c_fontSize ptr (realToFrac size)
+
+
+-- | Sets font blur for subsequent text writing.
+fontBlur :: Float -- ^ blur (in px)
+         -> VG ()
+fontBlur size = applyContext $ \ptr -> c_fontBlur ptr (realToFrac size)
 
 
 -- | Horizontal alignment
