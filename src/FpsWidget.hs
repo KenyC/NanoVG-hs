@@ -48,7 +48,7 @@ drawGraph graph@FpsGraph{..} position = do
         average = graphAvg graph
 
 
-    withPath False $ do
+    withPath Open $ do
         rect position size
         fillColor $ fromRGBA 0 0 0 128
         fill
@@ -56,7 +56,7 @@ drawGraph graph@FpsGraph{..} position = do
     withNewState $ do
         translate $ position + V2 0 height
 
-        withPath True $ do
+        withPath Closed $ do
             moveTo 0
             forM_ [0 .. historyCount - 1] $ \i -> do
                 -- let iFloat :: Float = fromIntegral i

@@ -82,7 +82,7 @@ drawGraph position@(V2 x y) dims@(V2 width height) time = do
 
 
     ------------------- Background -----------------
-    withPath False $ do
+    withPath Open $ do
         curveLine
 
         lineTo $ position + dims
@@ -94,13 +94,13 @@ drawGraph position@(V2 x y) dims@(V2 width height) time = do
     ------------------- GRAPH LINE -----------------
     strokeWidth 3
     translate $ 2 *^ unit _y
-    withPath False $ do
+    withPath Open $ do
         curveLine
         strokeColor $ Color 0 0 0 0.125
         stroke
 
     translate $ -2 *^ unit _y
-    withPath False $ do
+    withPath Open $ do
         curveLine
         strokeColor $ Color 0 0.625 0.75 1
         stroke
@@ -113,7 +113,7 @@ drawGraph position@(V2 x y) dims@(V2 width height) time = do
                 3 8
                 (Color 0 0 0 0.125) (Color 0 0 0 0)
 
-        withPath False $ do
+        withPath Open $ do
             rect 
                 (position - 10 + V2 0 2)
                 (V2 20 20)
@@ -153,7 +153,7 @@ drawEyes
                 (Color 0 0 0 0.125)
                 (Color 0 0 0 0.0625)
 
-        withPath False $ do
+        withPath Open $ do
             ellipse 
                 (leftEye + (V2 3 16))
                 ex ey
@@ -169,7 +169,7 @@ drawEyes
                 (Color 0.86 0.86 0.86 1)
                 (Color 0.5  0.5  0.5  1)
 
-        withPath False $ do
+        withPath Open $ do
             ellipse 
                 (V2 lx ly)
                 ex ey
@@ -191,14 +191,14 @@ drawEyes
 
 
         fillColor $ Color 0.0625 0.0625 0.0625 1.0
-        withPath False $ do
+        withPath Open $ do
             ellipse
                 (rightEye + closedEye + (ey * 0.25 * (1 -blink)) *^ unit _y)
                 br
                 (br * blink)
             fill
 
-        withPath False $ do
+        withPath Open $ do
             ellipse
                 (leftEye + closedEye + (ey * 0.25 * (1 -blink)) *^ unit _y)
                 br
@@ -215,7 +215,7 @@ drawEyes
                     (Color 1 1 1 0.5)
                     (Color 1 1 1 0)
 
-        withPath False $ do
+        withPath Open $ do
             ellipse leftEye ex ey
             fillPaint gloss
             fill
@@ -228,7 +228,7 @@ drawEyes
                     (Color 1 1 1 0)
 
 
-        withPath False $ do
+        withPath Open $ do
             ellipse rightEye ex ey
             fillPaint gloss
             fill
@@ -252,7 +252,7 @@ drawColorwheel position dims time = do
     forM_ [0 .. 5] $ \i -> do
         let beginArc = i       / 6  * 2 * pi - halfPixel :: Float
             endArc   = (i + 1) / 6  * 2 * pi - halfPixel
-        withPath True $ do
+        withPath Closed $ do
             arc
                 center outerRadius
                 beginArc endArc
@@ -274,7 +274,7 @@ drawColorwheel position dims time = do
         fillPaint gradient
         fill
 
-    withPath False $ do
+    withPath Open $ do
         circle center $ innerRadius - 0.5
         circle center $ outerRadius + 0.5
         strokeColor $ Color 0 0 0 0.25
@@ -287,7 +287,7 @@ drawColorwheel position dims time = do
     translate center
     rotate $ hue * 2 * pi
     strokeWidth 2
-    withPath False $ do
+    withPath Open $ do
         rect
             (V2 (innerRadius - 1)               (-3))
             (V2 (outerRadius - innerRadius + 2) 6   )
@@ -300,7 +300,7 @@ drawColorwheel position dims time = do
                     2 4
                     (fromRGBA 0 0 0 128)
                     (fromRGBA 0 0 0 0  )
-    withPath False $ do
+    withPath Open $ do
         rect 
             (V2 (innerRadius - 2 - 10)               (- 4 - 10))
             (V2 (outerRadius - innerRadius + 4 + 20) (8 + 20))
@@ -318,7 +318,7 @@ drawColorwheel position dims time = do
         pointB       = sizeTriangle *^ (angle $ - 120/180 * pi)
         pointC       = V2 sizeTriangle 0
 
-    withPath True $ do
+    withPath Closed $ do
         moveTo pointC 
         lineTo pointA
         lineTo pointB
@@ -347,7 +347,7 @@ drawColorwheel position dims time = do
 
     let selectPos = pointA * (V2 0.3 0.4)
     strokeWidth 2
-    withPath False $ do
+    withPath Open $ do
         circle selectPos 5
         strokeColor $ fromRGBA 255 255 255 192
         stroke
@@ -357,7 +357,7 @@ drawColorwheel position dims time = do
                 7 9
                 (fromRGBA 0 0 0 64)
                 (fromRGBA 0 0 0 0)
-    withPath False $ do
+    withPath Open $ do
         rect
             (selectPos - 20)
             40

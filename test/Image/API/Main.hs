@@ -80,12 +80,12 @@ main = do
                 let render = do
                         glClear GL_COLOR_BUFFER_BIT
                         frame nanovg windowResolution $ do
-                                withPath False $ do
+                                withPath Open $ do
                                     rect (V2 0 0) (V2 50 50)
                                     fillPaint imagePaint
                                     fill     
 
-                                withPath False $ do
+                                withPath Open $ do
                                     translate $ V2 50 50
                                     rect (V2 0 0) $ fromIntegral <$> size2
                                     fillPaint image2Paint

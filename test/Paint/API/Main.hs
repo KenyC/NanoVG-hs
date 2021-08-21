@@ -67,17 +67,17 @@ main = do
 
                 frame nanovg windowResolution $ do
 
-                    withPath False $ do
+                    withPath Open $ do
                         rect 0 (V2 200 50)
                         fillPaint linear
                         fill   
 
-                    withPath False $ do
+                    withPath Open $ do
                         rect (V2 0 100) (V2 200 50)
                         fillPaint box
                         fill  
 
-                    withPath False $ do
+                    withPath Open $ do
                         rect (V2 0 200) (V2 200 200)
                         fillPaint radial
                         fill     

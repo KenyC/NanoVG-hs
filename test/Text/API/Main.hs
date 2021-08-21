@@ -48,49 +48,48 @@ main = do
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
                 frame nanovg windowResolution $ do
-                        withPath False $ do
-                            -- Boxed "Aloha !"
-                            fontFace robotoFont
-                            fontSize 20
-                            fillColor (Color 1 0 0 1)
-                            void $ text 20 "Aloha !" 
-                            (position, dims) <- textBounds 20 "Aloha !"
-                            withPath False $ do
-                                rect position dims
-                                stroke
+                    -- Boxed "Aloha !"
+                    fontFace robotoFont
+                    fontSize 20
+                    fillColor (Color 1 0 0 1)
+                    void $ text 20 "Aloha !" 
+                    (position, dims) <- textBounds 20 "Aloha !"
+                    withPath Open $ do
+                        rect position dims
+                        stroke
 
 
-                            -- Boxed Aloha paragrpah
-                            fontSize 10
-                            fillColor (Color 1 0 1 1)
-                            let text1 = "Aloha !fezfezf ezfez fezf ezfez"
-                            textBox 
-                                (V2 30 40) 
-                                60
-                                text1
-                            (position, dims) <- textBoxBounds (V2 30 40) 60 text1
-                            withPath False $ do
-                                rect position dims
-                                stroke
+                    -- Boxed Aloha paragrpah
+                    fontSize 10
+                    fillColor (Color 1 0 1 1)
+                    let text1 = "Aloha !fezfezf ezfez fezf ezfez"
+                    textBox 
+                        (V2 30 40) 
+                        60
+                        text1
+                    (position, dims) <- textBoxBounds (V2 30 40) 60 text1
+                    withPath Open $ do
+                        rect position dims
+                        stroke
 
 
-                            -- Centered paragraph
-                            fillColor (Color 0 0 1 1)
-                            textAlign $ Align CenterAlign Baseline
-                            byteStringBox 
-                                (V2 80 40) 
-                                60
-                                "Aloha !fezfezf ezfez fezf ezfez"
+                    -- Centered paragraph
+                    fillColor (Color 0 0 1 1)
+                    textAlign $ Align CenterAlign Baseline
+                    byteStringBox 
+                        (V2 80 40) 
+                        60
+                        "Aloha !fezfezf ezfez fezf ezfez"
 
-                            -- Paragraph with wide interlines
-                            fillColor (Color 0 1 1 1)
-                            textAlign $ Align LeftAlign Baseline
-                            textLineHeight    1.25
-                            textLetterSpacing 5
-                            byteStringBox 
-                                (V2 30 80) 
-                                60
-                                "Aloha !fezfezf ezfez fezf ezfez"
+                    -- Paragraph with wide interlines
+                    fillColor (Color 0 1 1 1)
+                    textAlign $ Align LeftAlign Baseline
+                    textLineHeight    1.25
+                    textLetterSpacing 5
+                    byteStringBox 
+                        (V2 30 80) 
+                        60
+                        "Aloha !fezfezf ezfez fezf ezfez"
 
     let appLoop = do
             render

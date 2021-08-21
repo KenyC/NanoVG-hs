@@ -49,12 +49,12 @@ main = do
     nanovg <- nvgGL3Context [debug]
 
     let draw2Rects = do
-                        withPath False $ do
+                        withPath Open $ do
                             rect 0 50
                             fillColor $ fromRGBA 255 0 0 255
                             fill
 
-                        withPath False $ do
+                        withPath Open $ do
                             rect 25 50
                             fillColor $ fromRGBA 0 255 0 255
                             fill
@@ -66,17 +66,17 @@ main = do
 
                 translate $ V2 800 500
                 scissor 0 $ V2 20 100
-                withPath False $ circle 0 50
+                withPath Open $ circle 0 50
                 fillColor $ Color 1 0 0 1
                 fill
 
                 intersectScissor 10 $ V2 20 100
-                withPath False $ circle 0 50
+                withPath Open $ circle 0 50
                 fillColor $ Color 0 1 0 1
                 fill
 
                 resetScissor
-                withPath False $ circle 0 20
+                withPath Open $ circle 0 20
                 fillColor $ Color 0 0 1 1
                 fill
 
@@ -88,7 +88,7 @@ main = do
                 -- draw2Rects    
 
 
-                -- withPath False $ do
+                -- withPath Open $ do
                 --     rect 0 100
                 --     fillColor $ fromRGBA 255 0 255 0
                 --     fill
@@ -132,7 +132,7 @@ drawLines = do
                 strokeWidth 3
                 strokeColor $ fromRGBA 0 0 0 160
 
-                withPath False $ do
+                withPath Open $ do
                     moveTo 0
                     mapM_ lineTo points 
                     stroke
@@ -140,7 +140,7 @@ drawLines = do
                 strokeWidth 0.25
                 strokeColor $ fromRGBA 0 192 255 255
 
-                withPath False $ do
+                withPath Open $ do
                     moveTo 0
                     mapM_ lineTo points 
                     stroke

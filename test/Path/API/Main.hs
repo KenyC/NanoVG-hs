@@ -44,7 +44,7 @@ main = do
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
                 frame nanovg windowResolution $ do
-                        withPath True $ do
+                        withPath Closed $ do
                             moveTo (V2 20 20)
                             lineTo (V2 40 40)
                             lineTo (V2 40 60)

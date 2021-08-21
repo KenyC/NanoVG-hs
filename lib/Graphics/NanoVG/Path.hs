@@ -9,15 +9,20 @@ import Foreign.ForeignPtr
 import Graphics.NanoVG.Internal.Path
 import Graphics.NanoVG.Context
 
-
+data PathType = Open
+              | Closed
+              deriving (Eq, Show)
+            
 -- | Starts new path. A path is a series of line, which can then be stroked (cf 'stroke') or filled (cf 'fill).
-withPath :: Bool   -- ^ Whether the path should be closed
-         -> VG ()  -- ^ Path drawing instructions
+withPath :: PathType   -- ^ Whether the path should be closed
+         -> VG ()      -- ^ Path drawing instructions
          -> VG ()
 withPath closed cont = do
                             applyContext c_beginPath
                             cont
-                            when closed $ applyContext c_closePath
+                            case closed of 
+                                Open   -> return ()
+                                Closed -> applyContext c_closePath
 
 
 
