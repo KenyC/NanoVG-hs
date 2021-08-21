@@ -45,7 +45,7 @@ render context windowResolution WindowState{..} = do
             (V2 250 250)
             time
 
-        Fps.drawGraph graph 0
+        Fps.drawGraph graph 0 font
 
 
 drawGraph :: V2 Float 

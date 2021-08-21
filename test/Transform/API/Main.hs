@@ -45,7 +45,7 @@ main = do
     nanovg <- nvgGL3Context [debug]
 
     let square :: VG ()
-        square = withPath False $ do
+        square = withPath Open $ do
             rect (V2 0 0) (V2 20 20)
             strokeColor (Color 1 0 0 1)
             stroke

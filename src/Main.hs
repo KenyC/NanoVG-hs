@@ -14,6 +14,8 @@ import Foreign.ForeignPtr
 import Linear.V2
 
 import Graphics.NanoVG
+import Graphics.NanoVG.Context
+import Graphics.NanoVG.Text
 import Render
 import WindowState
 import Glew
@@ -44,14 +46,15 @@ main = do
     glewInit
 
     nvgContext <- nvgGL3Context [debug]
-
+    Just font  <- withContext nvgContext $ createFont "resources/Roboto-Regular.ttf"
   
     glClearColor 0.3 0.3 0.3 1
 
     let state = WindowState {
         time = 0,
         mousePosition = 0,
-        graph = Fps.emptyGraph
+        graph = Fps.emptyGraph,
+        font  = font
     }
 
     let appLoop currentState = do
