@@ -1,4 +1,5 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards     #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Render where
 
 import Control.Monad
@@ -43,6 +44,11 @@ render context windowResolution WindowState{..} = do
         drawColorwheel 
             (V2 (width - 300) (height -300))
             (V2 250 250)
+            time
+
+        drawLines 
+            (V2 120 (height - 50))
+            (V2 600 50)
             time
 
         Fps.drawGraph graph 0 font
@@ -367,3 +373,50 @@ drawColorwheel position dims time = do
 
     restore
     restore
+
+
+
+drawLines :: V2 Float 
+          -> V2 Float
+          -> Float
+          -> VG ()
+drawLines position dims@(V2 width height) time = do
+    let pad    = 5
+    let widthLine = width / 9 - 2 * pad
+    let start:points = [ V2 (- widthLine * 0.25) 0 + widthLine * 0.5 *^ angle (0.3 * time) 
+                       , V2 (- widthLine * 0.25) 0
+                       , V2 (widthLine * 0.25) 0
+                       , V2 (widthLine * 0.25) 0 + widthLine * 0.5 *^ angle (- 0.3 * time) ]
+    
+    let joins = [Miter, RoundJoin, Bevel]
+    let caps  = [Butt,  RoundCap,  Square]
+
+    let enumerate = zip [0..]
+
+    withNewState $ 
+        forM_ (enumerate joins) $ \(i :: Float, join) ->
+            forM_ (enumerate caps) $ \(j :: Float, cap) -> 
+                withNewState $ do
+                    translate $ position + widthLine * 0.5 *^ V2 1 (-1) + pad *^ 1  + (3 * i + j) / 9 *^ V2 width 0
+
+                    lineCap  cap
+                    lineJoin join
+                    strokeWidth $ widthLine * 0.3
+                    strokeColor $ fromRGBA 0 0 0 160
+
+                    withPath Open $ do
+                        moveTo start
+                        mapM_ lineTo points
+                        stroke
+
+                    lineCap  Butt
+                    lineJoin Bevel
+                    strokeWidth 1
+                    strokeColor $ fromRGBA 0 192 255 255
+
+                    withPath Open $ do
+                        moveTo start
+                        mapM_ lineTo points
+                        stroke
+
+
