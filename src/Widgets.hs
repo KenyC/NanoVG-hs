@@ -156,6 +156,37 @@ drawEditBox
             label
         return ()
 
+drawEditBoxNum :: ByteString
+               -> ByteString
+               -> Font
+               -> V2 Float
+               -> V2 Float
+               -> VG ()
+drawEditBoxNum 
+    measure unit
+    font
+    pos dims@(V2 width height) = do
+        drawEditBoxBase pos dims
+
+        (_, V2 unitWidth _) <- byteStringBounds 0 unit
+
+        fontSize 15
+        fontFace font
+        fillColor $ fromRGBA 255 255 255 64
+        textAlign $ Align RightAlign Middle
+        byteString
+            (pos + V2 width 0 + height *^ V2 (-0.3) 0.5)
+            unit
+
+        fontSize 17
+        fontFace font
+        fillColor $ fromRGBA 255 255 255 128
+        textAlign $ Align RightAlign Middle
+        byteString
+            (pos + V2 (width - unitWidth) 0 + height *^ V2 (- 0.5) 0.5)
+            measure
+        return ()
+
 
 drawEditBoxBase :: V2 Float
                 -> V2 Float
@@ -312,3 +343,68 @@ drawButton
 
 
         return ()
+
+drawSlider :: Float
+           -> V2 Float
+           -> V2 Float
+           -> VG ()
+drawSlider value pos dims@(V2 width height) = do 
+    withNewState $ do
+        translate pos
+        let midY       = height / 2
+            knobRadius = height / 4
+
+        -- slot
+        bg <- boxGradient 
+                    (V2 0     (midY - 2 + 1))
+                    (V2 width 4)
+                    2 2
+                    (fromRGBA 0 0 0 32)
+                    (fromRGBA 0 0 0 128)
+        withPath Open $ do
+            roundedRect 
+                (V2 0 (midY - 2))
+                (V2 width 4)
+                2
+            fillPaint bg
+            fill
+
+        -- knob shadow
+        let positionOnSlider = value * width
+        bg <- radialGradient 
+                (V2 positionOnSlider (midY + 1))
+                (knobRadius - 3) (knobRadius + 3)
+                (fromRGBA 0 0 0 64)
+                (fromRGBA 0 0 0 0 )
+
+        withPath Open $ do
+            rect 
+                (V2 positionOnSlider 0 - (knobRadius + 5) *^ 1)
+                ((knobRadius * 2 + 5) *^ 1 + V2 5 3)
+            circle (V2 positionOnSlider midY) knobRadius
+            pathWinding Hole
+            fillPaint bg
+            fill
+
+        -- knob
+        bg <- linearGradient 
+                (V2 0 (midY - knobRadius))
+                (V2 0 (midY + knobRadius))
+                (fromRGBA 255 255 255 16)
+                (fromRGBA 0   0   0   16)
+        withPath Open $ do
+            circle (V2 positionOnSlider midY) $ knobRadius - 1
+            fillColor $ fromRGBA 40 43 48 255
+            fill
+            fillPaint bg
+            fill
+
+        withPath Open $ do
+            circle (V2 positionOnSlider midY) $ knobRadius - 0.5
+            strokeColor $ fromRGBA 0 0 0 92
+            stroke
+
+
+
+
+

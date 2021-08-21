@@ -84,6 +84,32 @@ render context windowResolution WindowState{..} = do
             (posCheckBox + V2 138 0) (V2 140 28) 
             (fromRGBA 0 96 128 255)
 
+        let posDiameter = posCheckBox + V2 0 45
+        drawLabel "Diameter" normalFont posDiameter (V2 280 20)
+
+        let posNum = posDiameter + V2 0 25
+        drawEditBoxNum 
+            "123.00" "px" 
+            normalFont
+            (posNum + V2 180 0) (V2 100 28)
+
+        drawSlider 0.4 posNum (V2 170 28)
+
+        let posButtons = posNum + V2 0 55
+        drawButton 
+            (Just iconTrash) "Delete" 
+            normalFont iconFont
+            posButtons
+            (V2 160 28)
+            (fromRGBA 128 16 8 255)
+        drawButton 
+            Nothing "Cancel" 
+            normalFont iconFont
+            (posButtons + V2 170 0)
+            (V2 110 28)
+            (fromRGBA 0 0 0 0)
+
+
 
         Fps.drawGraph graph 0 normalFont
 
