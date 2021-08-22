@@ -1,3 +1,15 @@
+{-|
+Module      : Graphics.NanoVG.Draw
+Description : Rendering and rendering settings.
+Copyright   : (c) Keny C, 2021
+License     : MIT
+Stability   : experimental
+
+To draw something, you need to give NanoVG a path (i.e. a list of lines or strokes) and then a method for rendering these segments.
+This module defines the functions for rendering a path ('stroke' or 'fill') and for tweaking rendering settings ('strokeColor', 'fillColor', 'strokeWidth', etc.)
+
+For functions to create the path, see 'Graphics.NanoVG.Path'. 
+-}
 {-# LANGUAGE RecordWildCards #-}
 module Graphics.NanoVG.Draw (
       strokeColor
@@ -23,7 +35,7 @@ import Graphics.NanoVG.Internal.Flag
 
 
 
--- | Data type for compositing operations. Documentation for the compisiting operation shamelessly stolen from [https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Compositing] (cf there for pictures).
+-- | Data type for compositing operations. Documentation for the compisiting operation shamelessly stolen from [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Compositing) (cf here for pictures).
 data CompositeOp =
       SourceOver         -- ^ This is the default setting and draws new shapes on top of the existing canvas content.                   
     | SourceIn           -- ^ The new shape is drawn only where both the new shape and the destination canvas overlap. Everything else is made transparent.         
@@ -75,9 +87,9 @@ globalCompositeOperation op = applyContext $ \ptr ->
                                         (toCInt op)
 
 
-data LineCapStyle = Butt
-                  | RoundCap
-                  | Square
+data LineCapStyle = Butt     -- ^ no cap ; line stops right at the extremity of the segment
+                  | RoundCap -- ^ round cap
+                  | Square   -- ^ square cap ; visually like 'Butt', but line continues beyond the extremity
                   deriving (Eq, Show)
 
 instance Flag LineCapStyle where
@@ -85,14 +97,14 @@ instance Flag LineCapStyle where
     toCInt RoundCap = _round
     toCInt Square   = _square
 
--- | Sets how the end of the line (cap) is drawn
+-- | Sets how the end of the line (cap) is drawn.
 lineCap :: LineCapStyle -> VG ()
 lineCap style = applyContext $ \ptr -> c_lineCap ptr (toCInt style)
 
 data LineJoinStyle =
-      Miter
-    | RoundJoin
-    | Bevel
+      Miter       
+    | RoundJoin   
+    | Bevel       
     deriving (Eq, Show)
 
 instance Flag LineJoinStyle where
@@ -115,7 +127,7 @@ globalAlpha alpha = applyContext $ \ptr -> c_globalAlpha ptr (realToFrac alpha)
 miterLimit :: Float -> VG ()
 miterLimit limit = applyContext $ \ptr -> c_miterLimit ptr (realToFrac limit)
 
--- | Draws current path as a series of strokes
+-- | Draws current path as a series of strokes.
 stroke :: VG ()
 stroke = applyContext c_stroke
 
@@ -131,16 +143,16 @@ strokeColor Color{..} =
         (realToFrac _alpha)
 
 
--- | Set width of strokes
+-- | Set width of strokes.
 strokeWidth :: Float
             -> VG ()
 strokeWidth width = applyContext $ \ptr -> c_strokeWidth ptr (realToFrac width)
 
--- | Fills area within current path with color
+-- | Fills area within current path with color.
 fill :: VG ()
 fill = applyContext c_fill
 
--- | Sets color of filling  
+-- | Sets color of filling. 
 fillColor :: Color
           -> VG ()
 fillColor Color{..} = 

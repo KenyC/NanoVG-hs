@@ -1,3 +1,14 @@
+{-|
+Module      : Graphics.NanoVG.Text
+Description : Creating font, rendering text
+Copyright   : (c) Keny C, 2021
+License     : MIT
+Stability   : experimental
+
+This module define functions to load fonts and render text to the screen.
+Fonts are loaded from file via 'createFont'. Text is then rendered through one of 'text' or 'byteString' (one line text), 'textBox' or 'byteStringBox' (multi-line text). 
+Every function that asks for 'ByteString' argument expects them to represent UTF-8 encoded text.
+-}
 module Graphics.NanoVG.Text (
     Font(..),
     createFont,
@@ -114,7 +125,7 @@ data Align = Align !HAlign !VAlign deriving (Show, Eq)
 instance Flag Align where
     toCInt (Align hAlign vAlign) = (toCInt hAlign) .|. (toCInt vAlign)
 
--- | Sets alignment properties for subsequent text writing
+-- | Sets alignment properties for subsequent text writing.
 textAlign :: Align -> VG ()
 textAlign alignment = applyContext $ \ptr -> c_textAlign ptr (toCInt alignment)
 
@@ -152,7 +163,7 @@ text (V2 x y) contents = applyContext $ \ptr ->
             contentsC
             (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
 
--- | Writes text UTF-8 encoded as ByteString at given location. ByteString equivalent for 'text'. 
+-- | Writes text UTF-8 encoded as ByteString at given location. ByteString equivalent of 'text'. 
 --   This function is more efficient as it does not involve copying data.
 byteString :: V2 Float   -- ^ where to write text
            -> ByteString -- ^ what to write  (ByteString representing text as UTF-8)
@@ -182,7 +193,7 @@ textBox (V2 x y) width contents = applyContext $ \ptr ->
             (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
 
 
--- | Writes text UTF-8 encoded as ByteString at given location. ByteString equivalent for 'textBox'. 
+-- | Writes text UTF-8 encoded as ByteString at given location. ByteString equivalent of 'textBox'. 
 --   This function is more efficient as it does not involve copying data.
 byteStringBox :: V2 Float   -- ^ where to write text
               -> Float      -- ^ width of text
@@ -256,7 +267,7 @@ byteStringBounds (V2 x y) contents = applyContext $ \ptr -> do
             return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
 
 
--- | Returns position and size of the smallest box containing the text written by the corresponding call to 'textBox'.
+-- | Returns position and size of the smallest box containing the text written by the corresponding call to 'byteStringBox'.
 byteStringBoxBounds :: V2 Float                -- ^ text position
                     -> Float                   -- ^ width
                     -> ByteString              -- ^ text

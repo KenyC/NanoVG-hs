@@ -1,3 +1,12 @@
+{-|
+Module      : Graphics.NanoVG.Color
+Description : Color data types and utilities.
+Copyright   : (c) Keny C, 2021
+License     : MIT
+Stability   : experimental
+
+Contains the color data type 'Color' used by functions such as 'fillColor' and 'strokeColor'.
+-}
 {-# LANGUAGE RecordWildCards #-}
 module Graphics.NanoVG.Color where
 
@@ -11,6 +20,7 @@ data Color = Color {
 } deriving (Eq, Show)
 
 
+-- | Create Color from RGBA values in range [0 .. 255] 
 fromRGBA 
     :: Float
     -> Float
@@ -19,6 +29,7 @@ fromRGBA
     -> Color
 fromRGBA red green blue alpha = Color (red / 255) (green / 255) (blue / 255) (alpha / 255)
 
+-- | Create Color from RGB values in range [0 .. 255]. Alpha component is set to maximum value.
 fromRGB
     :: Float
     -> Float

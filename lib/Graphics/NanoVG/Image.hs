@@ -1,3 +1,12 @@
+{-|
+Module      : Graphics.NanoVG.Image
+Description : Load and display images.
+Copyright   : (c) Keny C, 2021
+License     : MIT
+Stability   : experimental
+
+This module defines functions to load images as 'Paint's, which can then be used to draw with.
+-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Graphics.NanoVG.Image (
     Image(),

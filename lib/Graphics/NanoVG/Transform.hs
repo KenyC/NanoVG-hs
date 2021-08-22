@@ -1,3 +1,12 @@
+{-|
+Module      : Graphics.NanoVG.Transform
+Description : Changing local coordinates.
+Copyright   : (c) Keny C, 2021
+License     : MIT
+Stability   : experimental
+
+This module define functions to change the coordinate system. In its most general form, the local coordinates are defined by a 3x3 matrix, encompassing translation, rotation and scale.
+-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Graphics.NanoVG.Transform where
 
@@ -12,7 +21,7 @@ import Graphics.NanoVG.Internal.Transform
 
 -- | Sets current tranform with a 3x3 matrix. The matrix must be in the following form
 --   \[
---   \begin{matrix}{ccc}
+--   \begin{matrix}
 --   a & b & c \\
 --   d & e & f \\
 --   0 & 0 & 1
@@ -34,11 +43,11 @@ getTransform = applyContext $ \ptr -> do
                     (V3 b d f)
                     (V3 0 0 1)
 
--- | Reset transform to identity matrix
+-- | Reset transform to identity matrix.
 resetTransform :: VG ()
 resetTransform = applyContext c_resetTransform
 
--- | Translate origin by vector
+-- | Translate origin by vector.
 translate :: V2 Float 
           -> VG ()
 translate (V2 x y) = applyContext $ \ptr -> c_translate 
@@ -46,7 +55,7 @@ translate (V2 x y) = applyContext $ \ptr -> c_translate
                                                  (realToFrac x) 
                                                  (realToFrac y)
 
--- | Rotate axes by angle (in radians)
+-- | Rotate axes by angle (in radians).
 rotate :: Float 
        -> VG ()
 rotate angle = applyContext $ \ptr -> c_rotate ptr (realToFrac angle)
@@ -60,7 +69,7 @@ skewY :: Float
 skewY value = applyContext $ \ptr -> c_skewY ptr (realToFrac value)
 
 
--- | Scale X and Y axis by value
+-- | Scale X and Y axis by value.
 scale :: V2 Float -- (x scaling factor, y scaling factor)
       -> VG ()
 scale (V2 sx sy) = applyContext $ \ptr -> c_scale ptr (realToFrac sx) (realToFrac sy)

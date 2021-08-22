@@ -1,3 +1,13 @@
+{-|
+Module      : Graphics.NanoVG.Paint
+Description : Gradients and color patterns.
+Copyright   : (c) Keny C, 2021
+License     : MIT
+Stability   : experimental
+
+This module allow you to initialize and use 'Paint's. 'Paint's allow you to 'fill' paths with non-uniform, gradient and image color patterns.
+Three gradient 'Paint's are defined: 'linearGradient', 'radialGradient', 'boxGradient'. Once created, the 'Paint' can be made current with 'fillPaint'.
+-}
 module Graphics.NanoVG.Paint where
 
 import Linear.V2
@@ -17,7 +27,7 @@ data Paint = Paint {
 createPaintFromPtr :: Ptr () -> IO Paint
 createPaintFromPtr ptr = Paint <$> newForeignPtr finalizerFree ptr
 
--- | Sets paint to be used for stroke
+-- | Sets paint to be used for stroke.
 strokePaint :: Paint -> VG ()
 strokePaint (Paint foreignPtr) = 
     applyContext $ \ptrContext -> 
@@ -25,7 +35,7 @@ strokePaint (Paint foreignPtr) =
         c_strokePaint ptrContext ptrPaint
 
 
--- | Sets paint to be used for fill
+-- | Sets paint to be used for fill.
 fillPaint :: Paint -> VG ()
 fillPaint (Paint foreignPtr) = 
     applyContext $ \ptrContext -> 
@@ -33,7 +43,7 @@ fillPaint (Paint foreignPtr) =
         c_fillPaint ptrContext ptrPaint
 
 
--- | Creates linear gradient from start point to end point
+-- | Creates linear gradient from start point to end point.
 linearGradient :: (V2 Float)  -- ^ position of start point
                -> (V2 Float)  -- ^ position of end point
                -> Color       -- ^ color at start point
@@ -81,7 +91,7 @@ boxGradient
 
 
 
--- | Creates radial gradient from inner radius to outer radius
+-- | Creates radial gradient from inner radius to outer radius.
 radialGradient :: (V2 Float)  -- ^ position of gradient's center 
                -> Float       -- ^ inner radius
                -> Float       -- ^ outer radius 

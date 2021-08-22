@@ -56,21 +56,21 @@ foreign import ccall unsafe "nanovg.h nvgStrokeColorHs"
                   -> Float -- ^ alpha
                   -> IO ()
 
+-- | Sets the composite operation. The op parameter should be one of NVGcompositeOperation.
 foreign import ccall unsafe "nanovg.h nvgGlobalCompositeOperation"
-    -- Sets the composite operation. The op parameter should be one of NVGcompositeOperation.
     c_globalCompositeOperation :: Ptr () 
                                -> CInt    -- ^ op
                                -> IO ()
 
+-- | Sets the composite operation with custom pixel arithmetic. The parameters should be one of NVGblendFactor.
 foreign import ccall unsafe "nanovg.h nvgGlobalCompositeBlendFunc"
-    -- Sets the composite operation with custom pixel arithmetic. The parameters should be one of NVGblendFactor.
     c_globalCompositeBlendFunc :: Ptr ()
                                -> CInt    --  ^ src
                                -> CInt    --  ^ dest
                                -> IO ()
 
+-- | Sets the composite operation with custom pixel arithmetic for RGB and alpha components separately. The parameters should be one of NVGblendFactor.
 foreign import ccall unsafe "nanovg.h nvgGlobalCompositeBlendFuncSeparate"
-    -- Sets the composite operation with custom pixel arithmetic for RGB and alpha components separately. The parameters should be one of NVGblendFactor.
     c_globalCompositeBlendFuncSeparate 
         :: Ptr ()
         -> CInt     -- ^ srcRGB
@@ -80,16 +80,16 @@ foreign import ccall unsafe "nanovg.h nvgGlobalCompositeBlendFuncSeparate"
         -> IO ()
 
 
+-- | Sets whether to draw antialias for nvgStroke() and nvgFill(). It's enabled by default.
 foreign import ccall unsafe "nanovg.h nvgShapeAntiAlias"
-    -- | Sets whether to draw antialias for nvgStroke() and nvgFill(). It's enabled by default.
     c_shapeAntiAlias :: Ptr () 
                      -> CInt
                      -> IO ()
 
 
+-- | Sets the miter limit of the stroke style.
+--   Miter limit controls when a sharp corner is beveled.
 foreign import ccall unsafe "nanovg.h nvgMiterLimit"
-    -- | Sets the miter limit of the stroke style.
-    --   Miter limit controls when a sharp corner is beveled.
     c_miterLimit :: Ptr () 
                  -> CFloat
                  -> IO ()
@@ -107,23 +107,23 @@ foreign import ccall unsafe "nanovg.h nvgMiterLimit"
 }
 
 
+-- | Sets how the end of the line (cap) is drawn,
+--   Can be one of: NVG_BUTT (default), NVG_ROUND, NVG_SQUARE.
 foreign import ccall unsafe "nanovg.h nvgLineCap"
-    -- | Sets how the end of the line (cap) is drawn,
-    --   Can be one of: NVG_BUTT (default), NVG_ROUND, NVG_SQUARE.
     c_lineCap :: Ptr () 
               -> CInt
               -> IO ()
 
+-- | Sets how sharp path corners are drawn.
+--   Can be one of NVG_MITER (default), NVG_ROUND, NVG_BEVEL.
 foreign import ccall unsafe "nanovg.h nvgLineJoin"
-    -- | Sets how sharp path corners are drawn.
-    --   Can be one of NVG_MITER (default), NVG_ROUND, NVG_BEVEL.
     c_lineJoin ::  Ptr () 
                 -> CInt
                 -> IO ()
 
+-- | Sets the transparency applied to all rendered shapes.
+--   Already transparent paths will get proportionally more transparent as well.
 foreign import ccall unsafe "nanovg.h nvgGlobalAlpha"
-    -- | Sets the transparency applied to all rendered shapes.
-    --   Already transparent paths will get proportionally more transparent as well.
     c_globalAlpha :: Ptr () 
                   -> CFloat
                   -> IO ()

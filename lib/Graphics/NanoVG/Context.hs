@@ -1,3 +1,14 @@
+{-|
+Module      : Graphics.NanoVG.Context
+Description : NanoVG context: initialization, manipulation and types.
+Copyright   : (c) Keny C, 2021
+License     : MIT
+Stability   : experimental
+
+This module defines functions to initialize a NanoVG context.
+This module also defines the 'VG' monad within which NanoVG drawing instructions are called. 
+When given a NanoVG context to execute into, 'VG' instructions can then be turned into 'IO' computations (cf 'frame' and 'withContext'). 
+-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Graphics.NanoVG.Context where
 
@@ -13,10 +24,12 @@ import Graphics.NanoVG.Internal
 import Graphics.NanoVG.Internal.State
 import Graphics.NanoVG.Internal.Flag
 
+-- | NanoVG context. All drawing instructions are evaluated in one such context. Use 'VG' monad to abstract away the context.
 data NVGContext = NVGContext {
     _getNVGContext :: !(ForeignPtr ())
 }
 
+-- | Window resolution. Needed by 'frame'.
 data WindowResolution = WindowResolution {
     _size :: !(V2 Float),
     _dpi  :: !Float
@@ -42,9 +55,9 @@ applyContext function = VG $ withReaderT _getNVGContext $ do
                             liftIO $ withForeignPtr foreignPtr function
 
 
-data InitFlag = Antialias
-              | StencilStrokes
-              | Debug
+data InitFlag = Antialias      -- ^ All drawings are anti-aliased
+              | StencilStrokes -- ^ ?
+              | Debug          -- ^ ?
               deriving (Eq, Show)
 
 instance Flag InitFlag where
@@ -53,7 +66,7 @@ instance Flag InitFlag where
     toCInt Debug          = _debug
 
 
--- | Creates a NanoVG context for OpenGL 3
+-- | Creates a NanoVG context for OpenGL 3.
 nvgGL3Context :: [InitFlag] -> IO NVGContext
 nvgGL3Context flags = do 
     pointer    <- c_createGL3 $ compileFlags flags
@@ -63,16 +76,16 @@ nvgGL3Context flags = do
 
 -- | Pushes current drawing state (i.e. stroke color, transform, fill paint, etc.) to a stack of states. 
 --   Then sets current drawing state back to default values.
---   Used in combination with ``restore``
+--   Used in combination with 'restore'.
 save :: VG ()
 save = applyContext c_save
 
 -- | Pops drawing state from stack (i.e. stroke color, transform, fill paint, etc.) and sets it to current state
---   Used in combination with ``save``
+--   Used in combination with 'save'.
 restore :: VG ()
 restore = applyContext c_restore
 
--- | Executes all commands in scope argument in new default drawing state. Previous drawing state is restored upon exit of the scope argument.
+-- | Executes all commands in the given scope in new default drawing state. Previous drawing state is restored upon exit of the scope argument.
 withNewState :: VG a  -- ^ Scope to be executed in new default drawing state
              -> VG a
 withNewState cont = do
@@ -81,6 +94,6 @@ withNewState cont = do
     restore
     return toReturn
 
--- | Resets drawing state to default initial values
+-- | Resets drawing state to default initial values.
 reset :: VG ()
 reset = applyContext c_reset

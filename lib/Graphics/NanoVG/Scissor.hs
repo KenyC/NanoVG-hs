@@ -1,3 +1,12 @@
+{-|
+Module      : Graphics.NanoVG.Scissor
+Description : Clipping drawings.
+Copyright   : (c) Keny C, 2021
+License     : MIT
+Stability   : experimental
+
+This module defines function that let you clip any drawing outside a certain rectangular area (called "scissor"). The area is always axis-aligned.
+-}
 {-# LANGUAGE RecordWildCards #-}
 module Graphics.NanoVG.Scissor where
 

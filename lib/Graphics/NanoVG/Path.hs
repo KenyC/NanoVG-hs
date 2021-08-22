@@ -1,3 +1,18 @@
+{-|
+Module      : Graphics.NanoVG.Path
+Description : NanoVG instructions for creating paths.
+Copyright   : (c) Keny C, 2021
+License     : MIT
+Stability   : experimental
+
+To draw something, you need to give NanoVG a path (i.e. a list of lines or strokes) and then a method for rendering these segments.
+This module defines the functions for creating a path.
+
+Every path instruction for the current path ought to be in the scope 'withPath'. Basic paths can be created via a series of calls to 'moveTo' (displaces current position) and 'lineTo' (adds the line between current position and new position, updates current position). 
+More complex shapes can be created with 'circle', 'rect', 'roundedRect', etc.
+
+For functions to draw the path after it is created, see 'Graphics.NanoVG.Draw'. 
+-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Graphics.NanoVG.Path where
 
@@ -8,11 +23,11 @@ import Graphics.NanoVG.Internal.Path
 import Graphics.NanoVG.Internal.Flag
 import Graphics.NanoVG.Context
 
-data PathType = Open
-              | Closed
+data PathType = Open    -- ^ final edge does not connect to first edge
+              | Closed  -- ^ final edge connects to first edge
               deriving (Eq, Show)
             
--- | Starts new path. A path is a series of line, which can then be stroked (cf 'stroke') or filled (cf 'fill).
+-- | Starts new path. A path is a series of line, which can then be stroked (cf 'stroke') or filled (cf 'fill').
 withPath :: PathType   -- ^ Whether the path should be closed
          -> VG ()      -- ^ Path drawing instructions
          -> VG ()
@@ -38,7 +53,7 @@ pathWinding :: PathWinding -> VG ()
 pathWinding winding = applyContext $ \ptr -> c_pathWinding ptr (toCInt winding)
 
 
--- | Adds a line from current position to the position given as argument to the current path 
+-- | Adds a line from current position to the position given as argument to the current path.
 lineTo :: V2 Float -- ^ Position to draw line
        -> VG ()
 lineTo (V2 x y) = 
@@ -47,7 +62,7 @@ lineTo (V2 x y) =
                                 (realToFrac x)
                                 (realToFrac y)
 
--- | Moves current position to position given as argument. No line is drawn
+-- | Moves current position to position given as argument. No line is drawn.
 moveTo :: V2 Float -- ^ New current position
        -> VG ()
 moveTo (V2 x y) = 
@@ -56,7 +71,7 @@ moveTo (V2 x y) =
                               (realToFrac x)
                               (realToFrac y)
 
--- | Adds a Bezier curve between current position and position given as argument to the path
+-- | Adds a Bezier curve between current position and position given as argument to the path.
 bezierTo :: V2 Float -- ^ control point 1
          -> V2 Float -- ^ control point 2
          -> V2 Float -- ^ position
@@ -72,7 +87,7 @@ bezierTo
                                 (realToFrac x)   (realToFrac y)
 
 
--- | Adds a part of a circle to the path
+-- | Adds a part of a circle to the path.
 arcTo :: V2 Float -- ^ corner 1
       -> V2 Float -- ^ corner 2
       -> Float    -- ^ radius
@@ -111,7 +126,7 @@ rect
             (realToFrac x) (realToFrac y) 
             (realToFrac w) (realToFrac h)
 
--- | Adds a rounded rectangle to the current path
+-- | Adds a rounded rectangle to the current path.
 roundedRect :: V2 Float -- ^ position of top-left corner
             -> V2 Float -- ^ dimensions (width, height)
             -> Float    -- ^ radius of corner
@@ -128,7 +143,7 @@ roundedRect
 
 
 
--- | Adds a rounded rectangle with different radii for each corner to the current path
+-- | Adds a rounded rectangle with different radii for each corner to the current path.
 roundedRectVarying :: V2 Float -- ^ position of top-left corner
                    -> V2 Float -- ^ dimensions (width, height)
                    -> V4 Float -- ^ radius of corners in the order: top left, top right, bottom right, bottom left
@@ -143,7 +158,7 @@ roundedRectVarying
             (realToFrac w) (realToFrac h)
             (realToFrac tl) (realToFrac tr) (realToFrac br) (realToFrac bl) 
 
--- | Adds arc to current path
+-- | Adds arc to current path.
 arc :: V2 Float -- ^ position of arc center
     -> Float    -- ^ radius of circle
     -> Float    -- ^ initial angle
@@ -164,7 +179,7 @@ arc
             (realToFrac initialAngle) (realToFrac finalAngle)
             (if dir then _clockwise else _counterClockwise)
 
--- | Adds arc to current path
+-- | Adds arc to current path.
 ellipse :: V2 Float -- ^ position of center
         -> Float    -- ^ radius on X
         -> Float    -- ^ radius on Y
@@ -179,7 +194,7 @@ ellipse
             (realToFrac centerX) (realToFrac centerY) 
             (realToFrac radiusX) (realToFrac radiusY) 
 
--- | Adds arc to current path
+-- | Adds arc to current path.
 circle :: V2 Float -- ^ position of center
        -> Float    -- ^ radius 
        -> VG ()
