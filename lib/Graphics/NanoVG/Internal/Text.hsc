@@ -182,6 +182,8 @@ foreign import ccall unsafe "nanovg.h nvgTextBoxBounds"
 --            Ptr ()
 --         -> CFloat
 --         -> CFloat
+--         -> Ptr CChar
+--         -> Ptr CChar
 --         -> 
 --         -> IO CInt
 --     (NVGcontext* ctx, float x, float y, const char* string, const char* end, NVGglyphPosition* positions, int maxPositions);
@@ -223,6 +225,9 @@ foreign import ccall unsafe "nanovg_hs_wrapper.h nvgIterTextLines"
                     -> IO CInt
 
 
+
+
+
 data CTextRow = CTextRow {
     _start :: CInt,
     _end   :: CInt,
@@ -251,3 +256,43 @@ instance Storable CTextRow where
 
 
 
+
+foreign import ccall unsafe "nanovg_hs_wrapper.h nvgStartIterTextGlyph"
+    c_startIterTextGlyph :: Ptr CChar
+                         -> Ptr CChar
+                         -> CFloat
+                         -> CFloat
+                         -> IO (Ptr ())
+
+
+foreign import ccall unsafe "nanovg_hs_wrapper.h nvgIterTextGlyph"
+    c_iterTextGlyph :: Ptr ()
+                    -> Ptr ()
+                    -> Ptr CTextGlyph
+                    -> IO CInt
+
+
+
+
+data CTextGlyph = CTextGlyph {
+    _index     :: CInt,
+    _logicalX  :: CFloat,
+    _minXGlyph :: CFloat,
+    _maxXGlyph :: CFloat
+} deriving (Show)
+
+instance Storable CTextGlyph where
+    sizeOf    _ = #{size      NVGtextGlyphHs}
+    alignment _ = #{alignment NVGtextGlyphHs}
+
+    poke p cGlyphPos = do
+      #{poke NVGtextGlyphHs, position} p $ _index      cGlyphPos
+      #{poke NVGtextGlyphHs, x}        p $ _logicalX   cGlyphPos
+      #{poke NVGtextGlyphHs, minx}     p $ _minXGlyph  cGlyphPos
+      #{poke NVGtextGlyphHs, maxx}     p $ _maxXGlyph  cGlyphPos
+
+    peek p = return CTextGlyph
+             `ap` (#{peek NVGtextGlyphHs, position} p)
+             `ap` (#{peek NVGtextGlyphHs, x}        p)
+             `ap` (#{peek NVGtextGlyphHs, minx}     p)
+             `ap` (#{peek NVGtextGlyphHs, maxx}     p)

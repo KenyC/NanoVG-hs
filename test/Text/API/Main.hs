@@ -13,6 +13,7 @@ import Foreign.ForeignPtr
 import Linear.V2
 --
 import Data.Text (Text)
+import qualified Data.Text.Encoding as Text
 
 import Graphics.NanoVG
 import Graphics.NanoVG.Color
@@ -49,15 +50,28 @@ main = do
     let render = do
                 glClear $ GL_COLOR_BUFFER_BIT
                 frame nanovg windowResolution $ do
-                    -- Boxed "Aloha !"
+                    -- Boxed "Aloha !" with 'h' on colored background
                     fontFace robotoFont
                     fontSize 20
                     fillColor (Color 1 0 0 1)
-                    void $ text 20 "Aloha !" 
-                    (position, dims) <- textBounds 20 "Aloha !"
+                    let label = "Aloha !"
+                        pos   = 20
+                    void $ text pos label 
+                    (position, dims) <- textBounds pos label
                     withPath Open $ do
                         rect position dims
                         stroke
+
+                    glyphs <- byteStringGlyphPos (Text.encodeUtf8 label) pos
+                    FontMetrics ascending descending lineHeight <- fontMetrics
+                    let GlyphPosition _ _ minX maxX = glyphs !! 3
+                    withPath Open $ do
+                        rect 
+                            (V2 minX $ 20 - ascending)
+                            (V2 (maxX - minX) lineHeight)
+                        fillColor $ fromRGBA 0 0 0 64
+                        fill
+
 
 
                     -- Boxed Aloha paragrpah

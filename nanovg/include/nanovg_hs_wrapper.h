@@ -92,6 +92,39 @@ NVGtextRowIter* nvgStartIterTextLines(
 );
 
 
+#define TEXT_GLYPHS_BUFFER_SIZE 100
+struct NVGtextGlyphIter {
+	const char* start;
+	const char* current;
+	const char* end;
+	NVGglyphPosition buffer_glyphs[TEXT_GLYPHS_BUFFER_SIZE];
+	float x;
+	float y;
+	int head;
+	int capacity;
+};
+typedef struct NVGtextGlyphIter NVGtextGlyphIter;
+
+struct NVGtextGlyphHs
+{
+	int position;
+	float x;
+	float minx, maxx;
+};
+typedef struct NVGtextGlyphHs NVGtextGlyphHs;
+
+int nvgIterTextGlyph(
+	NVGcontext*       ctx, 
+	NVGtextGlyphIter* iter, 
+	NVGtextGlyphHs*   result
+);
+
+NVGtextGlyphIter* nvgStartIterTextGlyph(
+	const char* string, const char* end,
+	float x, float y
+);
+
+
 
 #ifndef RELEASE
 void printNvgPaint(NVGpaint* paint);

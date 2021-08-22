@@ -21,7 +21,9 @@ module Graphics.NanoVG.Text (
     FontMetrics(..),
     fontMetrics,
     TextRow(..),
-    byteStringBreakLines
+    byteStringBreakLines,
+    GlyphPosition(..),
+    byteStringGlyphPos
 ) where
 
 import Control.Exception (bracket)
@@ -329,3 +331,41 @@ byteStringBreakLines text width = applyContext $ \ptr -> BS.unsafeUseAsCStringLe
                                             (realToFrac   maxX)
                             (item:) <$> loop
             loop
+
+
+data GlyphPosition = GlyphPosition {
+      _index     :: Int    -- ^ index in of glyph's starting byte in original byte string
+    , _logicalX  :: Float  -- ^ logical x position of glyph
+    , _minXGlyph :: Float  -- ^ minimum x position of glyph
+    , _maxXGlyph :: Float  -- ^ maximum x position of glyph
+} deriving (Eq, Show)
+
+--
+byteStringGlyphPos :: ByteString
+                   -> V2 Float
+                   -> VG [GlyphPosition]
+byteStringGlyphPos text (V2 posX posY) = applyContext $ \ptr -> BS.unsafeUseAsCStringLen text $ \(textC, len) -> do
+    let withIter = bracket before after
+        before   = c_startIterTextGlyph 
+                        textC
+                        (plusPtr textC $ len * sizeOf (undefined :: CChar)) 
+                        (realToFrac posX)
+                        (realToFrac posY)
+        after    = free
+    alloca $ \glyph ->
+        withIter $ \iter -> do
+
+            let loop = do
+                        notDone <- c_iterTextGlyph ptr iter glyph
+                        if notDone == 0
+                        then return []
+                        else do
+                            Internal.CTextGlyph index logicalX minX maxX <- peek glyph
+                            let item = GlyphPosition 
+                                            (fromIntegral index) 
+                                            (realToFrac   logicalX) 
+                                            (realToFrac   minX) 
+                                            (realToFrac   maxX)
+                            (item:) <$> loop
+            loop
+

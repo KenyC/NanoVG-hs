@@ -225,3 +225,60 @@ int nvgIterTextLines(
 
 	return 1; 
 }
+
+
+
+NVGtextGlyphIter* nvgStartIterTextGlyph(
+	const char* string, const char* end,
+	float x, float y
+)
+{
+	NVGtextGlyphIter* to_return  = malloc(sizeof(NVGtextGlyphIter));
+	to_return -> start     = string;
+	to_return -> current   = string;
+	to_return -> end       = end;
+	to_return -> x         = x;
+	to_return -> y         = y;
+	to_return -> head      = 0;
+	to_return -> capacity  = 0;
+	return to_return;
+}
+
+
+int nvgIterTextGlyph(
+	NVGcontext*       ctx, 
+	NVGtextGlyphIter* iter, 
+	NVGtextGlyphHs*   result
+)
+{
+	NVGglyphPosition glyph_pos;
+
+	if(iter -> capacity == 1) {
+		return 0;
+	}
+	else if(iter -> head < iter -> capacity - 1) {
+		// Draw from buffer
+		glyph_pos = iter -> buffer_glyphs[iter -> head++];
+	}
+	else {
+		// load some more
+		iter -> capacity = nvgTextGlyphPositions(
+			ctx,
+			iter -> x, iter -> y,
+			iter -> current, iter -> end,
+			iter -> buffer_glyphs,
+			TEXT_GLYPHS_BUFFER_SIZE
+		);
+		if(iter -> capacity == 0) return 0;
+		iter -> current = iter -> buffer_glyphs[iter -> capacity - 1].str;
+		iter -> head    = 1;
+		glyph_pos = iter -> buffer_glyphs[0];
+	}
+
+	result -> position  = glyph_pos.str - iter -> start;
+	result -> x         = glyph_pos.x;
+	result -> minx      = glyph_pos.minx; 
+	result -> maxx      = glyph_pos.maxx;
+
+	return 1; 
+}
