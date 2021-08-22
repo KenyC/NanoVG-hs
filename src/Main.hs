@@ -45,7 +45,7 @@ main = do
     context <- SDL.glCreateContext window
     glewInit
 
-    nvgContext <- nvgGL3Context [debug]
+    nvgContext <- nvgGL3Context [Debug]
     Just normalFont  <- withContext nvgContext $ createFont "resources/Roboto-Regular.ttf"
     Just boldFont    <- withContext nvgContext $ createFont "resources/Roboto-Bold.ttf"
     Just iconFont    <- withContext nvgContext $ createFont "resources/entypo.ttf"
