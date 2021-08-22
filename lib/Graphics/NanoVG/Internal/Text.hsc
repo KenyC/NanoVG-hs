@@ -2,8 +2,12 @@ module Graphics.NanoVG.Internal.Text where
 
 import Foreign.C.Types
 import Foreign.Ptr
+import Foreign.Storable
+--
+import Control.Monad (ap)
 
 #include "nanovg.h"
+#include "nanovg_hs_wrapper.h"
 
 foreign import ccall unsafe "nanovg.h nvgCreateFont"
     -- | Creates font by loading it from the disk from specified file name.
@@ -182,30 +186,68 @@ foreign import ccall unsafe "nanovg.h nvgTextBoxBounds"
 --         -> IO CInt
 --     (NVGcontext* ctx, float x, float y, const char* string, const char* end, NVGglyphPosition* positions, int maxPositions);
 
--- -- Returns the vertical metrics based on the current text style.
--- -- Measured values are returned in local coordinate space.
--- foreign import ccall unsafe "nanovg.h nvgTextMetrics"
---     c_textMetrics ::
---         Ptr ()
---         -> IO ()
---     (NVGcontext* ctx, float* ascender, float* descender, float* lineh);
+foreign import ccall unsafe "nanovg.h nvgTextMetrics"
+    -- | Returns the vertical metrics based on the current text style.
+    --   Measured values are returned in local coordinate space.
+    c_textMetrics ::
+           Ptr ()
+        -> Ptr CFloat
+        -> Ptr CFloat
+        -> Ptr CFloat
+        -> IO ()
 
--- -- Breaks the specified text into lines. If end is specified only the sub-string will be used.
--- -- White space is stripped at the beginning of the rows, the text is split at word boundaries or when new-line characters are encountered.
--- -- Words longer than the max width are slit at nearest character (i.e. no hyphenation).
--- foreign import ccall unsafe "nanovg.h nvgTextBreakLines"
---     c_textBreakLines ::
---            Ptr ()
---         -> IO CInt
---     (NVGcontext* ctx, const char* string, const char* end, float breakRowWidth, NVGtextRow* rows, int maxRows);
+foreign import ccall unsafe "nanovg.h nvgTextBreakLines"
+    -- | Breaks the specified text into lines. If end is specified only the sub-string will be used.
+    --   White space is stripped at the beginning of the rows, the text is split at word boundaries or when new-line characters are encountered.
+    --   Words longer than the max width are slit at nearest character (i.e. no hyphenation).
+    c_textBreakLines :: Ptr ()
+                     -> Ptr ()
+                     -> Ptr ()
+                     -> CFloat
+                     -> Ptr CTextRow
+                     -> CInt
+                     -> IO CInt
+
+
+foreign import ccall unsafe "nanovg_hs_wrapper.h nvgStartIterTextLines"
+    c_startIterTextLines :: Ptr CChar
+                         -> Ptr CChar
+                         -> CFloat
+                         -> IO (Ptr ())
+
+
+foreign import ccall unsafe "nanovg_hs_wrapper.h nvgIterTextLines"
+    c_iterTextLines :: Ptr ()
+                    -> Ptr ()
+                    -> Ptr CTextRow
+                    -> IO CInt
+
+
+data CTextRow = CTextRow {
+    _start :: CInt,
+    _end   :: CInt,
+    _width :: CFloat,
+    _minX  :: CFloat,
+    _maxX  :: CFloat
+} deriving (Show)
+
+instance Storable CTextRow where
+    sizeOf    _ = #{size      NVGtextRowHs}
+    alignment _ = #{alignment NVGtextRowHs}
+
+    poke p cTextRow = do
+      #{poke NVGtextRowHs, start} p $ _start cTextRow
+      #{poke NVGtextRowHs, end}   p $ _end   cTextRow
+      #{poke NVGtextRowHs, width} p $ _width cTextRow
+      #{poke NVGtextRowHs, minx}  p $ _minX  cTextRow
+      #{poke NVGtextRowHs, maxx}  p $ _maxX  cTextRow
+
+    peek p = return CTextRow
+             `ap` (#{peek NVGtextRowHs, start} p)
+             `ap` (#{peek NVGtextRowHs, end}   p)
+             `ap` (#{peek NVGtextRowHs, width} p)
+             `ap` (#{peek NVGtextRowHs, minx}  p)
+             `ap` (#{peek NVGtextRowHs, maxx}  p)
 
 
 
-
--- foreign import ccall unsafe "nanovg.h import"
---     foreign import ccall unsafe "nanovg.| nvgGlobalAlpha"
---     -- | Sets the transparency applied to all rendered shapes.
---     --   Already transparent paths will get proportionally more transparent as well.
---     c_globalAlpha :: Ptr () 
---                   -> CFloat
---                   -> IO ()

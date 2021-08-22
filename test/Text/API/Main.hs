@@ -20,6 +20,7 @@ import Graphics.NanoVG.Context
 import Graphics.NanoVG.Text
 import Graphics.NanoVG.Draw
 import Graphics.NanoVG.Path
+import Graphics.NanoVG.Transform
 import Glew
 import Test
 
@@ -81,7 +82,7 @@ main = do
                         60
                         "Aloha !fezfezf ezfez fezf ezfez"
 
-                    -- Paragraph with wide interlines
+                    -- Paragraph with wide interlines, underlined
                     fillColor (Color 0 1 1 1)
                     textAlign $ Align LeftAlign Baseline
                     textLineHeight    1.25
@@ -90,6 +91,30 @@ main = do
                         (V2 30 80) 
                         60
                         "Aloha !fezfezf ezfez fezf ezfez"
+
+                    -- Paragraph with underline
+                    withNewState $ do
+                        reset
+                        textAlign $ Align LeftAlign Baseline
+                        fillColor $ fromRGB 45 145 63
+                        translate $ V2 90 90
+                        let text  = "I am an alien. I am a legal alien."
+                            width = 60
+                        byteStringBox
+                            0 width
+                            text
+                            
+                        FontMetrics _ _ lineHeight <- fontMetrics
+                        rows <- byteStringBreakLines text width
+                        forM_ (zip [0..] rows) $ \(i, TextRow _ _ width _ _) -> do
+                            withPath Open $ do
+                                let y = i * lineHeight + 3 -- litte below baseline
+                                moveTo $ V2 0     y
+                                lineTo $ V2 width y
+                                stroke
+
+
+
 
     let appLoop = do
             render

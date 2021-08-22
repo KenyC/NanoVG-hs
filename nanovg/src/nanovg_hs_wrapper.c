@@ -165,3 +165,63 @@ NVGpaint* nvgImagePatternHs(
 	);
 	return to_return;
 }
+
+
+/**************************************
+Text Metrics Iterator
+***************************************/
+
+
+
+NVGtextRowIter* nvgStartIterTextLines(
+	const char* string, const char* end,
+	float breakRowWidth
+) 
+{
+	NVGtextRowIter* to_return  = malloc(sizeof(NVGtextRowIter));
+	to_return -> start         = string;
+	to_return -> current       = string;
+	to_return -> end           = end;
+	to_return -> breakRowWidth = breakRowWidth;
+	to_return -> head          = 0;
+	to_return -> capacity      = 0;
+	return to_return;
+}
+
+
+int nvgIterTextLines(
+	NVGcontext*     ctx, 
+	NVGtextRowIter* iter, 
+	NVGtextRowHs*   result
+) 
+{
+	NVGtextRow row;
+	if(iter -> head < iter -> capacity) {
+		// Draw from buffer
+		row = iter -> buffer_rows[iter -> head++];
+	}
+	else {
+		// load some more
+		iter -> capacity = nvgTextBreakLines(
+			ctx,
+			iter -> current, iter -> end,
+			iter -> breakRowWidth,
+			iter -> buffer_rows,
+			TEXT_LINES_BUFFER_SIZE
+		);
+		if(iter -> capacity == 0) return 0;
+		iter -> current = iter -> buffer_rows[iter -> capacity - 1].next;
+		iter -> head    = 1;
+		row = iter -> buffer_rows[0];
+	}
+
+
+
+	result -> start  = row.start - iter -> start;
+	result -> end    = row.end   - iter -> start;
+	result -> width  = row.width;
+	result -> minx   = row.minx; 
+	result -> maxx   = row.maxx;
+
+	return 1; 
+}

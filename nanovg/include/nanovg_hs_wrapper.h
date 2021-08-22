@@ -59,6 +59,40 @@ NVGpaint* nvgImagePatternHs(
 	float angle, int image, float alpha
 );
 
+
+#define TEXT_LINES_BUFFER_SIZE 15
+struct NVGtextRowIter {
+	const char* start;
+	const char* current;
+	const char* end;
+	NVGtextRow buffer_rows[TEXT_LINES_BUFFER_SIZE];
+	float breakRowWidth;
+	int head;
+	int capacity;
+};
+typedef struct NVGtextRowIter NVGtextRowIter;
+
+struct NVGtextRowHs
+{
+	int start, end;
+	float width;
+	float minx, maxx;
+};
+typedef struct NVGtextRowHs NVGtextRowHs;
+
+int nvgIterTextLines(
+	NVGcontext*     ctx, 
+	NVGtextRowIter* iter, 
+	NVGtextRowHs*   result
+);
+
+NVGtextRowIter* nvgStartIterTextLines(
+	const char* string, const char* end,
+	float breakRowWidth
+);
+
+
+
 #ifndef RELEASE
 void printNvgPaint(NVGpaint* paint);
 #endif

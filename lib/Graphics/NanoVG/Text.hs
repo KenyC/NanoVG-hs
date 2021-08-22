@@ -17,14 +17,22 @@ module Graphics.NanoVG.Text (
     textBounds,
     textBoxBounds,
     byteStringBounds,
-    byteStringBoxBounds
+    byteStringBoxBounds,
+    FontMetrics(..),
+    fontMetrics,
+    TextRow(..),
+    byteStringBreakLines
 ) where
 
+import Control.Exception (bracket)
+import Control.Monad     (ap)
+--
 import Foreign.Ptr
 import Foreign.C.Types
 import Foreign.C.String
 import Foreign.Storable
 import Foreign.Marshal.Array
+import Foreign.Marshal.Alloc
 --
 import Linear.V2
 --
@@ -37,7 +45,8 @@ import Data.Bits ((.|.))
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Color
 import Graphics.NanoVG.Internal
-import Graphics.NanoVG.Internal.Text
+import Graphics.NanoVG.Internal.Text hiding (CTextRow(..))
+import qualified Graphics.NanoVG.Internal.Text as Internal
 
 
 -- | Data type for fonts
@@ -261,3 +270,62 @@ byteStringBoxBounds (V2 x y) width text = applyContext $ \ptr -> do
             let xMin:yMin:xMax:yMax:_ = map realToFrac boundsList
             return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
 
+
+data FontMetrics = FontMetrics {
+    _ascending  :: !Float,  -- ^ how much a letter can go above the baseline 
+    _descending :: !Float,  -- ^ how much a letter can go below the baseline (letters with tails like j, g)
+    _lineHeight :: !Float
+} deriving (Eq, Show)
+
+
+fontMetrics :: VG FontMetrics
+fontMetrics = applyContext $ \ptr -> do
+    alloca $ \ascendingC   -> do
+     alloca $ \descendingC  -> do
+      alloca $ \lineHeightC  -> do
+        c_textMetrics ptr ascendingC descendingC lineHeightC
+        
+        (return FontMetrics) 
+            `ap` (realToFrac <$> peek ascendingC)
+            `ap` (realToFrac <$> peek descendingC)
+            `ap` (realToFrac <$> peek lineHeightC)
+
+data TextRow = TextRow {
+    _startIndex :: Int,    -- ^ index where the given row starts in the bytestring
+    _endIndex   :: Int,    -- ^ index where the given row ends in the bytestring
+    _width      :: Float,  -- ^ line width
+    _minX       :: Float,  -- ^ min X of line   
+    _maxX       :: Float   -- ^ max X of line
+} deriving (Show, Eq)
+
+
+-- | Breaks a text (UTF-8 encoded bytestring) into lines of maximum width 
+--   The values returned are the same values used by 'byteStringBox' and 'textBox' in laying out the Text
+byteStringBreakLines :: ByteString
+                     -> Float
+                     -> VG [TextRow]
+byteStringBreakLines text width = applyContext $ \ptr -> BS.unsafeUseAsCStringLen text $ \(textC, len) -> do
+
+    let withIter = bracket before after
+        before   = c_startIterTextLines 
+                        textC
+                        (plusPtr textC $ len * sizeOf (undefined :: CChar)) 
+                        (realToFrac width)
+        after    = free
+    alloca $ \row ->
+        withIter $ \iter -> do
+
+            let loop = do
+                        notDone <- c_iterTextLines ptr iter row
+                        if notDone == 0
+                        then return []
+                        else do
+                            Internal.CTextRow start end width minX maxX <- peek row
+                            let item = TextRow 
+                                            (fromIntegral start) 
+                                            (fromIntegral end) 
+                                            (realToFrac   width) 
+                                            (realToFrac   minX) 
+                                            (realToFrac   maxX)
+                            (item:) <$> loop
+            loop

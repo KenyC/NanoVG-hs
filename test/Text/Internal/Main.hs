@@ -13,7 +13,9 @@ import Data.Bits
 --
 import Foreign.ForeignPtr
 import Foreign.Ptr
+import Foreign.Storable
 import Foreign.Marshal.Array
+import Foreign.Marshal.Alloc
 import Foreign.C.String
 --
 import Linear.V2
@@ -74,84 +76,112 @@ main = do
                 frame nanovg windowResolution $ do
                         liftIO $ withForeignPtr (_getNVGContext nanovg) $ \ptr -> do
                             withCString "Aloha !" $ \text1 -> do
-                                withCString "Aloha !dzagjz ezfez fezf ezfez" $ \text2 -> do
-                                    c_beginPath ptr
-                                    c_fontFaceId ptr fontId
+                             withCString "Aloha !dzagjz ezfez fezf ezfez" $ \text2 -> do
+                              withCString "I am an alien. I am a legal alien." $ \text3 -> do
+                                c_beginPath ptr
+                                c_fontFaceId ptr fontId
 
-                                    c_fontSize      ptr 120
-                                    c_fillColor     ptr 1 0 1 1
-                                    void $ c_text
-                                                ptr
+                                ------------------- Framed label -----------------
+                                c_fontSize      ptr 120
+                                c_fillColor     ptr 1 0 1 1
+                                void $ c_text
+                                            ptr
+                                            100 100
+                                            text1
+                                            nullPtr
+
+                                (xMin, yMin, xMax, yMax) <- withArray [0, 0, 0, 0] $ \bounds -> do
+                                    void $ c_textBounds 
+                                                ptr 
                                                 100 100
                                                 text1
                                                 nullPtr
+                                                bounds
+                                    xMin:yMin:xMax:yMax:_ <- peekArray 4 bounds
+                                    return (xMin, yMin, xMax, yMax)
 
-                                    (xMin, yMin, xMax, yMax) <- withArray [0, 0, 0, 0] $ \bounds -> do
-                                        void $ c_textBounds 
-                                                    ptr 
-                                                    100 100
-                                                    text1
-                                                    nullPtr
-                                                    bounds
-                                        xMin:yMin:xMax:yMax:_ <- peekArray 4 bounds
-                                        return (xMin, yMin, xMax, yMax)
+                                c_beginPath ptr
+                                c_rect ptr 
+                                       xMin yMin
+                                       (xMax - xMin) (yMax - yMin)
+                                c_stroke ptr
 
-                                    c_beginPath ptr
-                                    c_rect ptr 
-                                           xMin yMin
-                                           (xMax - xMin) (yMax - yMin)
-                                    c_stroke ptr
+                                ------------------- Framed blurred text box -----------------
+                                c_fontSize  ptr 18
+                                c_fontBlur  ptr 5
+                                c_fillColor ptr 1 0 0 1
 
+                                void $ c_textBox
+                                            ptr
+                                            100 200
+                                            150
+                                            text2
+                                            nullPtr
 
-                                    c_fontSize  ptr 18
-                                    c_fontBlur  ptr 5
-                                    c_fillColor ptr 1 0 0 1
-
-                                    void $ c_textBox
+                                (xMin, yMin, xMax, yMax) <- withArray [0, 0, 0, 0] $ \bounds -> do
+                                    void $ c_textBoxBounds
                                                 ptr
                                                 100 200
                                                 150
                                                 text2
                                                 nullPtr
+                                                bounds
+                                    xMin:yMin:xMax:yMax:_ <- peekArray 4 bounds
+                                    return (xMin, yMin, xMax, yMax)
 
-                                    (xMin, yMin, xMax, yMax) <- withArray [0, 0, 0, 0] $ \bounds -> do
-                                        void $ c_textBoxBounds
-                                                    ptr
-                                                    100 200
-                                                    150
-                                                    text2
-                                                    nullPtr
-                                                    bounds
-                                        xMin:yMin:xMax:yMax:_ <- peekArray 4 bounds
-                                        return (xMin, yMin, xMax, yMax)
 
-                                    c_beginPath ptr
-                                    c_rect ptr 
-                                           xMin yMin
-                                           (xMax - xMin) (yMax - yMin)
-                                    c_stroke ptr
 
-                                    c_fontBlur  ptr 0
-                                    c_textAlign ptr $ _align_right .|. _align_bottom
-                                    c_fillColor ptr 0 1 0 1
-                                    void $ c_textBox
-                                                ptr
-                                                300 200
-                                                150
-                                                text2
-                                                nullPtr
+                                c_beginPath ptr
+                                c_rect ptr 
+                                       xMin yMin
+                                       (xMax - xMin) (yMax - yMin)
+                                c_stroke ptr
 
-                                    c_fontBlur  ptr 0
-                                    c_textAlign ptr $ _align_left
-                                    c_fillColor ptr 1 1 0 1
-                                    c_textLetterSpacing ptr 5
-                                    c_textLineHeight    ptr 2
-                                    void $ c_textBox
-                                                ptr
-                                                100 300
-                                                150
-                                                text2
-                                                nullPtr
+                                ------------------- Right-aligned text box with framed lines -----------------
+                                c_fontBlur  ptr 0
+                                c_textAlign ptr $ _align_right .|. _align_bottom
+                                c_fillColor ptr 0 1 0 1
+                                void $ c_textBox
+                                            ptr
+                                            300 200
+                                            150
+                                            text2
+                                            nullPtr
+
+                                iterator <- c_startIterTextLines text2 nullPtr 150
+
+                                alloca $ \row -> do
+                                  alloca $ \lineHeight -> do
+                                    c_textMetrics ptr nullPtr nullPtr lineHeight
+                                    lineHeightHs <- peek lineHeight
+                                    let loop i = do
+                                                 done <- c_iterTextLines ptr iterator row
+                                                 return ()
+                                                 if done == 0
+                                                 then return ()
+                                                 else do
+                                                        rowHs <- peek row
+
+                                                        c_beginPath ptr
+                                                        c_moveTo ptr (450 - _minX rowHs) $ 200 + i * lineHeightHs
+                                                        c_lineTo ptr (450 - _maxX rowHs) $ 200 + i * lineHeightHs
+                                                        c_stroke ptr
+
+                                                        loop $ i + 1
+                                    loop 0
+
+                                ------------------- Text box with spacing -----------------
+                                c_fontBlur  ptr 0
+                                c_textAlign ptr $ _align_left
+                                c_fillColor ptr 1 1 0 1
+                                c_textLetterSpacing ptr 5
+                                c_textLineHeight    ptr 2
+                                void $ c_textBox
+                                            ptr
+                                            100 300
+                                            150
+                                            text2
+                                            nullPtr
 
 
 
