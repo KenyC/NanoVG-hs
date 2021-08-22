@@ -1,9 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 module Graphics.NanoVG.Scissor where
 
-import Foreign.ForeignPtr
-import Foreign.C.Types
---
 import Linear.V2
 
 import Graphics.NanoVG.Context

@@ -17,6 +17,7 @@ import Linear.V2
 import Graphics.NanoVG
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Internal
+import Graphics.NanoVG.Internal.Draw
 import Graphics.NanoVG.Internal.Paint
 import Graphics.NanoVG.Internal.Path
 import Glew
@@ -41,7 +42,7 @@ main = do
   
     glClearColor 1 1 1 1
 
-    nanovg <- nvgGL3Context [debug]
+    nanovg <- nvgGL3Context [Debug]
 
 
 

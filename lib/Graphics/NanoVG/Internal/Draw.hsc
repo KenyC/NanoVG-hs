@@ -2,8 +2,6 @@ module Graphics.NanoVG.Internal.Draw where
 
 import Foreign.C.Types
 import Foreign.Ptr
-import Foreign.Storable
-import Foreign.ForeignPtr
 
 #include "nanovg.h"
 -- #include "nanovg_gl.h"
@@ -23,6 +21,40 @@ import Foreign.ForeignPtr
   , _xor              = NVG_XOR
 }
 
+------------------- DRAW FUNCTIONS -----------------
+
+
+
+
+foreign import ccall unsafe "nanovg.h nvgStroke"
+    c_stroke :: Ptr ()
+             -> IO ()
+
+foreign import ccall unsafe "nanovg.h nvgStrokeWidth"
+    c_strokeWidth :: Ptr ()
+                  -> CFloat
+                  -> IO ()
+
+foreign import ccall unsafe "nanovg.h nvgFill"
+    c_fill :: Ptr ()
+           -> IO ()
+
+
+foreign import ccall unsafe "nanovg.h nvgFillColorHs"
+    c_fillColor :: Ptr ()
+                -> CFloat -- ^ red
+                -> CFloat -- ^ green
+                -> CFloat -- ^ blue
+                -> CFloat -- ^ alpha
+                -> IO ()
+
+foreign import ccall unsafe "nanovg.h nvgStrokeColorHs"
+    c_strokeColor :: Ptr ()
+                  -> Float -- ^ red
+                  -> Float -- ^ green
+                  -> Float -- ^ blue
+                  -> Float -- ^ alpha
+                  -> IO ()
 
 foreign import ccall unsafe "nanovg.h nvgGlobalCompositeOperation"
     -- Sets the composite operation. The op parameter should be one of NVGcompositeOperation.

@@ -13,9 +13,8 @@ import Control.Exception (bracket)
 import Data.ByteString        (ByteString)
 import Data.ByteString.Unsafe
 --
-import Linear.V2
+import Linear.V2 hiding (angle)
 --
-import Foreign.Ptr
 import Foreign.ForeignPtr
 import Foreign.Ptr
 import Foreign.C.String
@@ -26,11 +25,30 @@ import Foreign.Storable
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Paint
 import Graphics.NanoVG.Internal.Image
+import Graphics.NanoVG.Internal.Flag
 import Graphics.NanoVG.Internal.Paint
 
 data Image = Image {
     _imageHandle :: !CInt
 }
+
+data ImageFlag = GenerateMipmaps  -- ^ Generate mipmaps during creation of the image. 
+               | RepeatX          -- ^ Repeat image in X direction.     
+               | RepeatY          -- ^ Repeat image in Y direction.           
+               | FlipY            -- ^ Flips (inverses) image in Y direction when rendered.         
+               | Premultiplied    -- ^ Image data has premultiplied alpha.        
+               | Nearest          -- ^ Image interpolation is Nearest instead Linear       
+               deriving (Eq, Show)
+
+instance Flag ImageFlag where
+    toCInt GenerateMipmaps = _imageflag_generate_mipmaps
+    toCInt RepeatX         = _imageflag_repeatx
+    toCInt RepeatY         = _imageflag_repeaty   
+    toCInt FlipY           = _imageflag_flipy 
+    toCInt Premultiplied   = _imageflag_premultiplied 
+    toCInt Nearest         = _imageflag_nearest  
+
+
 
 -- | Runs the provided computation with an 'Image' loaded from file (extensions accepted: jpg, png, psd, tga, pic and gif).
 --   If image file does not exist or cannot be loaded, Nothing is passed to the continuation.
@@ -43,7 +61,7 @@ withImage (NVGContext context) pathToImage flags =
     bracket before after
     where before = withForeignPtr context $ \ptr -> do
                 handle <- withCString pathToImage $ \c_pathToImage ->
-                    c_createImage ptr c_pathToImage (compileImageFlags flags)
+                    c_createImage ptr c_pathToImage (compileFlags flags)
                 case handle of 
                     0 -> return Nothing
                     _ -> return $ Just $ Image handle
@@ -74,7 +92,7 @@ withImageRGBA
                                 ptr                        
                                 (fromIntegral width)
                                 (fromIntegral height)
-                                (compileImageFlags flags)
+                                (compileFlags flags)
                                 (castPtr imgArray)
 
           after (Image handle) = withForeignPtr context $ \ptr -> c_deleteImage ptr handle

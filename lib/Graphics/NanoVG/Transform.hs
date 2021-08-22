@@ -1,13 +1,13 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Graphics.NanoVG.Transform where
 
 import Foreign.Marshal.Array
 --
-import Linear.V2
+import Linear.V2 hiding (angle)
 import Linear.V3
 import Linear.Matrix
 
 import Graphics.NanoVG.Context
-import Graphics.NanoVG.Internal
 import Graphics.NanoVG.Internal.Transform
 
 -- | Sets current tranform with a 3x3 matrix. The matrix must be in the following form
@@ -26,7 +26,7 @@ putTransform matrix = applyContext $ \ptr -> c_transform ptr a b c d e f
 -- | Get transform as a 3x3 matrix.
 getTransform :: VG (M33 Float)
 getTransform = applyContext $ \ptr -> do
-    withArray [0 | _ <- [1 .. 6]] $ \ptrTf -> do
+    withArray [0 | _ :: Int <- [1 .. 6]] $ \ptrTf -> do
         c_currentTransform ptr ptrTf 
         a:b:c:d:e:f:[]  <- map realToFrac <$> peekArray 6 ptrTf
         return $ V3

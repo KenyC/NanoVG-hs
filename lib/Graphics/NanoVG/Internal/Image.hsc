@@ -2,10 +2,6 @@ module Graphics.NanoVG.Internal.Image where
 
 import Foreign.C.Types
 import Foreign.Ptr
-import Foreign.Storable
-import Foreign.ForeignPtr
---
-import Data.Bits
 
 #include "nanovg.h"
 
@@ -58,12 +54,6 @@ foreign import ccall unsafe "nanovg.h nvgDeleteImage"
     c_deleteImage :: Ptr () -> CInt -> IO ()
 
 
-data ImageFlag = GenerateMipmaps  -- ^ Generate mipmaps during creation of the image. 
-                | RepeatX          -- ^ Repeat image in X direction.     
-                | RepeatY          -- ^ Repeat image in Y direction.           
-                | FlipY            -- ^ Flips (inverses) image in Y direction when rendered.         
-                | Premultiplied    -- ^ Image data has premultiplied alpha.        
-                | Nearest          -- ^ Image interpolation is Nearest instead Linear       
 
 
 
@@ -76,12 +66,3 @@ data ImageFlag = GenerateMipmaps  -- ^ Generate mipmaps during creation of the i
     _imageflag_nearest          = NVG_IMAGE_NEAREST
 }
 
-compileImageFlags :: [ImageFlag] -> CInt
-compileImageFlags = foldr ((.|.) . toIntVal)  0
-                    where toIntVal :: ImageFlag -> CInt
-                          toIntVal GenerateMipmaps = _imageflag_generate_mipmaps
-                          toIntVal RepeatX         = _imageflag_repeatx
-                          toIntVal RepeatY         = _imageflag_repeaty   
-                          toIntVal FlipY           = _imageflag_flipy 
-                          toIntVal Premultiplied   = _imageflag_premultiplied 
-                          toIntVal Nearest         = _imageflag_nearest  

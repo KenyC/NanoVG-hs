@@ -23,16 +23,18 @@ module Graphics.NanoVG.Text (
     TextRow(..),
     byteStringBreakLines,
     GlyphPosition(..),
+    addFallbackFont,
+    resetFallbackFont,
     byteStringGlyphPos
 ) where
 
 import Control.Exception (bracket)
-import Control.Monad     (ap)
+import Control.Monad     (ap, void)
 --
 import Foreign.Ptr
-import Foreign.C.Types
 import Foreign.C.String
-import Foreign.Storable
+import Foreign.C.Types
+import Foreign.Storable      hiding (alignment)
 import Foreign.Marshal.Array
 import Foreign.Marshal.Alloc
 --
@@ -45,10 +47,9 @@ import qualified Data.ByteString.Unsafe as BS
 import Data.Bits ((.|.))
 
 import Graphics.NanoVG.Context
-import Graphics.NanoVG.Color
-import Graphics.NanoVG.Internal
 import Graphics.NanoVG.Internal.Text hiding (CTextRow(..))
 import qualified Graphics.NanoVG.Internal.Text as Internal
+import Graphics.NanoVG.Internal.Flag
 
 
 -- | Data type for fonts
@@ -90,10 +91,11 @@ data HAlign = LeftAlign      -- ^ Default, align text horizontally to left.
             | CenterAlign    -- ^ Align text horizontally to center. 
             | RightAlign     -- ^ Align text horizontally to right.
             deriving (Show, Eq)
-hAlignToCint :: HAlign -> CInt
-hAlignToCint LeftAlign   = _align_left
-hAlignToCint RightAlign  = _align_right
-hAlignToCint CenterAlign = _align_center
+
+instance Flag HAlign where
+    toCInt LeftAlign   = _align_left
+    toCInt RightAlign  = _align_right
+    toCInt CenterAlign = _align_center
 
 -- | Vertical alignment
 data VAlign = Top       -- ^ Align text vertically to top. 
@@ -101,19 +103,20 @@ data VAlign = Top       -- ^ Align text vertically to top.
             | Bottom    -- ^ Align text vertically to bottom. 
             | Baseline  -- ^ Default, align text vertically to baseline. 
             deriving (Show, Eq)
-vAlignToCint :: VAlign -> CInt
-vAlignToCint Top      = _align_top
-vAlignToCint Middle   = _align_middle
-vAlignToCint Bottom   = _align_bottom
-vAlignToCint Baseline = _align_baseline
+instance Flag VAlign where
+    toCInt Top      = _align_top
+    toCInt Middle   = _align_middle
+    toCInt Bottom   = _align_bottom
+    toCInt Baseline = _align_baseline
 
 data Align = Align !HAlign !VAlign deriving (Show, Eq)
-alignToCint :: Align -> CInt
-alignToCint (Align hAlign vAlign) = (hAlignToCint hAlign) .|. (vAlignToCint vAlign)
+
+instance Flag Align where
+    toCInt (Align hAlign vAlign) = (toCInt hAlign) .|. (toCInt vAlign)
 
 -- | Sets alignment properties for subsequent text writing
 textAlign :: Align -> VG ()
-textAlign alignment = applyContext $ \ptr -> c_textAlign ptr (alignToCint alignment)
+textAlign alignment = applyContext $ \ptr -> c_textAlign ptr (toCInt alignment)
 
 -- | Sets space between letters (in px).
 textLetterSpacing :: Float -> VG ()
@@ -200,10 +203,10 @@ byteStringBox (V2 x y) width contents = applyContext $ \ptr ->
 textBounds :: V2 Float                -- ^ text position
            -> Text                    -- ^ text
            -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
-textBounds (V2 x y) text = applyContext $ \ptr -> do
-    Text.withCStringLen text $ \(contentsC, size) -> do
+textBounds (V2 x y) contents = applyContext $ \ptr -> do
+    Text.withCStringLen contents $ \(contentsC, size) -> do
         withArray [0, 0, 0, 0] $ \bounds -> do
-            c_textBounds
+            void $ c_textBounds
                 ptr 
                 (realToFrac x) (realToFrac y)
                 contentsC
@@ -219,8 +222,8 @@ textBoxBounds :: V2 Float                -- ^ text position
               -> Float                   -- ^ width
               -> Text                    -- ^ text
               -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
-textBoxBounds (V2 x y) width text = applyContext $ \ptr -> do
-    Text.withCStringLen text $ \(contentsC, size) -> do
+textBoxBounds (V2 x y) width contents = applyContext $ \ptr -> do
+    Text.withCStringLen contents $ \(contentsC, size) -> do
         withArray [0, 0, 0, 0] $ \bounds -> do
             c_textBoxBounds
                 ptr 
@@ -239,10 +242,10 @@ textBoxBounds (V2 x y) width text = applyContext $ \ptr -> do
 byteStringBounds :: V2 Float                -- ^ text position
                  -> ByteString              -- ^ text
                  -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
-byteStringBounds (V2 x y) text = applyContext $ \ptr -> do
-    BS.unsafeUseAsCStringLen text $ \(contentsC, size) -> do
+byteStringBounds (V2 x y) contents = applyContext $ \ptr -> do
+    BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
         withArray [0, 0, 0, 0] $ \bounds -> do
-            c_textBounds
+            void $ c_textBounds
                 ptr 
                 (realToFrac x) (realToFrac y)
                 contentsC
@@ -258,10 +261,10 @@ byteStringBoxBounds :: V2 Float                -- ^ text position
                     -> Float                   -- ^ width
                     -> ByteString              -- ^ text
                     -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
-byteStringBoxBounds (V2 x y) width text = applyContext $ \ptr -> do
-    BS.unsafeUseAsCStringLen text $ \(contentsC, size) -> do
+byteStringBoxBounds (V2 x y) width contents = applyContext $ \ptr -> do
+    BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
         withArray [0, 0, 0, 0] $ \bounds -> do
-            c_textBoxBounds
+            void $ c_textBoxBounds
                 ptr 
                 (realToFrac x) (realToFrac y)
                 (realToFrac width)
@@ -306,7 +309,7 @@ data TextRow = TextRow {
 byteStringBreakLines :: ByteString
                      -> Float
                      -> VG [TextRow]
-byteStringBreakLines text width = applyContext $ \ptr -> BS.unsafeUseAsCStringLen text $ \(textC, len) -> do
+byteStringBreakLines contents width = applyContext $ \ptr -> BS.unsafeUseAsCStringLen contents $ \(textC, len) -> do
 
     let withIter = bracket before after
         before   = c_startIterTextLines 
@@ -322,11 +325,11 @@ byteStringBreakLines text width = applyContext $ \ptr -> BS.unsafeUseAsCStringLe
                         if notDone == 0
                         then return []
                         else do
-                            Internal.CTextRow start end width minX maxX <- peek row
+                            Internal.CTextRow start end widthLine minX maxX <- peek row
                             let item = TextRow 
                                             (fromIntegral start) 
                                             (fromIntegral end) 
-                                            (realToFrac   width) 
+                                            (realToFrac   widthLine) 
                                             (realToFrac   minX) 
                                             (realToFrac   maxX)
                             (item:) <$> loop
@@ -344,7 +347,7 @@ data GlyphPosition = GlyphPosition {
 byteStringGlyphPos :: ByteString
                    -> V2 Float
                    -> VG [GlyphPosition]
-byteStringGlyphPos text (V2 posX posY) = applyContext $ \ptr -> BS.unsafeUseAsCStringLen text $ \(textC, len) -> do
+byteStringGlyphPos contents (V2 posX posY) = applyContext $ \ptr -> BS.unsafeUseAsCStringLen contents $ \(textC, len) -> do
     let withIter = bracket before after
         before   = c_startIterTextGlyph 
                         textC

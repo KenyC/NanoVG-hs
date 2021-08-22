@@ -2,8 +2,6 @@ module Graphics.NanoVG.Internal.Paint where
 
 import Foreign.C.Types
 import Foreign.Ptr
-import Foreign.Storable
-import Foreign.ForeignPtr
 
 
 -- | Sets current stroke style to a paint, which can be a one of the gradients or a pattern.

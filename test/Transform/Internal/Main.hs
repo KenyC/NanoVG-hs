@@ -22,6 +22,7 @@ import Text.Printf
 import Graphics.NanoVG
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Internal
+import Graphics.NanoVG.Internal.Draw
 import Graphics.NanoVG.Internal.Transform
 import Graphics.NanoVG.Internal.Path
 import Glew
@@ -46,7 +47,7 @@ main = do
   
     glClearColor 1 1 1 1
 
-    nanovg <- nvgGL3Context [debug]
+    nanovg <- nvgGL3Context [Debug]
 
     let square :: Ptr () -> IO ()
         square ptr = do

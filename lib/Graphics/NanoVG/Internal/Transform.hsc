@@ -2,8 +2,6 @@ module Graphics.NanoVG.Internal.Transform where
 
 import Foreign.C.Types
 import Foreign.Ptr
-import Foreign.Storable
-import Foreign.ForeignPtr
 
 foreign import ccall unsafe "nanovg.h nvgResetTransform"
     -- | Resets current transform to a identity matrix.

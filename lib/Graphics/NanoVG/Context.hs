@@ -7,10 +7,11 @@ import Foreign.ForeignPtr
 import Linear.V2
 --
 import Control.Monad.Reader
-import Control.Monad.IO.Class
+import Control.Monad.IO.Class ()
 
 import Graphics.NanoVG.Internal
 import Graphics.NanoVG.Internal.State
+import Graphics.NanoVG.Internal.Flag
 
 data NVGContext = NVGContext {
     _getNVGContext :: !(ForeignPtr ())
@@ -41,10 +42,21 @@ applyContext function = VG $ withReaderT _getNVGContext $ do
                             liftIO $ withForeignPtr foreignPtr function
 
 
+data InitFlag = Antialias
+              | StencilStrokes
+              | Debug
+              deriving (Eq, Show)
+
+instance Flag InitFlag where
+    toCInt Antialias      = _antialias
+    toCInt StencilStrokes = _stencil_strokes
+    toCInt Debug          = _debug
+
+
 -- | Creates a NanoVG context for OpenGL 3
-nvgGL3Context :: [CreateFlags] -> IO NVGContext
+nvgGL3Context :: [InitFlag] -> IO NVGContext
 nvgGL3Context flags = do 
-    pointer    <- c_createGL3 $ compileCreateFlags flags
+    pointer    <- c_createGL3 $ compileFlags flags
     foreignPtr <- newForeignPtr c_destroyGL3 pointer
     return $ NVGContext foreignPtr
 

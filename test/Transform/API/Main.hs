@@ -42,7 +42,7 @@ main = do
   
     glClearColor 1 1 1 1
 
-    nanovg <- nvgGL3Context [debug]
+    nanovg <- nvgGL3Context [Debug]
 
     let square :: VG ()
         square = withPath Open $ do

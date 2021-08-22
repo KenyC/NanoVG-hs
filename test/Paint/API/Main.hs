@@ -40,7 +40,7 @@ main = do
   
     glClearColor 1 1 1 1
 
-    nanovg <- nvgGL3Context [debug]
+    nanovg <- nvgGL3Context [Debug]
     linear <- withContext nanovg $ linearGradient
                                 (V2 0 0)
                                 (V2 100 0)

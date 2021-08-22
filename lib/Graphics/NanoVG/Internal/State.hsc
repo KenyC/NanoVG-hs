@@ -1,9 +1,6 @@
 module Graphics.NanoVG.Internal.State where
 
-import Foreign.C.Types
 import Foreign.Ptr
-import Foreign.Storable
-import Foreign.ForeignPtr
 
 -- |  Pushes and saves the current render state into a state stack.
 --    A matching nvgRestore() must be used to restore the state.

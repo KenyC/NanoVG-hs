@@ -2,8 +2,6 @@ module Graphics.NanoVG.Internal.Path where
 
 import Foreign.C.Types
 import Foreign.Ptr
-import Foreign.Storable
-import Foreign.ForeignPtr
 
 #include "nanovg.h"
 -- #include "nanovg_gl.h"

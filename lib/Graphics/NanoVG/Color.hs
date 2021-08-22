@@ -1,10 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 module Graphics.NanoVG.Color where
 
-import Foreign.ForeignPtr
-
-import Graphics.NanoVG.Context
-import Graphics.NanoVG.Internal
 
 -- | RGBA representation of color
 data Color = Color {

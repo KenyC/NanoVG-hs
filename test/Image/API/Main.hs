@@ -58,7 +58,7 @@ main = do
   
     glClearColor 1 1 1 1
 
-    nanovg <- nvgGL3Context [debug]
+    nanovg <- nvgGL3Context [Debug]
 
     withImage nanovg "resources/image.jpg" [FlipY] $ \case
         Nothing    -> putStrLn "Couldn't load image... Exiting!" 

@@ -15,15 +15,11 @@ module Graphics.NanoVG.Draw (
     , globalAlpha
 ) where
 
-import Foreign.ForeignPtr
-import Foreign.C.Types
---
-import Linear.V2
 
 import Graphics.NanoVG.Context
 import Graphics.NanoVG.Color
-import Graphics.NanoVG.Internal
 import Graphics.NanoVG.Internal.Draw
+import Graphics.NanoVG.Internal.Flag
 
 
 
@@ -44,19 +40,19 @@ data CompositeOp =
     | CustomOpSeparate Int Int Int Int
     deriving (Eq, Show)
 
-opToCint :: CompositeOp -> CInt
-opToCint SourceOver      = _source_over
-opToCint SourceIn        = _source_in
-opToCint SourceOut       = _source_out
-opToCint SourceAtop      = _source_atop
-opToCint DestinationOver = _destination_over
-opToCint DestinationIn   = _destination_in
-opToCint DestinationOut  = _destination_out
-opToCint DestinationAtop = _destination_atop
-opToCint Lighter         = _lighter
-opToCint Copy            = _copy
-opToCint Xor             = _xor
-opToCint _               = error "Custom operations do not have CInt representations."
+instance Flag CompositeOp where
+    toCInt SourceOver      = _source_over
+    toCInt SourceIn        = _source_in
+    toCInt SourceOut       = _source_out
+    toCInt SourceAtop      = _source_atop
+    toCInt DestinationOver = _destination_over
+    toCInt DestinationIn   = _destination_in
+    toCInt DestinationOut  = _destination_out
+    toCInt DestinationAtop = _destination_atop
+    toCInt Lighter         = _lighter
+    toCInt Copy            = _copy
+    toCInt Xor             = _xor
+    toCInt _               = error "Custom operations do not have CInt representations."
 
 
 
@@ -76,23 +72,22 @@ globalCompositeOperation (CustomOpSeparate srcRGB destRGB srcA destA) =
 globalCompositeOperation op = applyContext $ \ptr -> 
                                     c_globalCompositeOperation 
                                         ptr 
-                                        (opToCint op)
+                                        (toCInt op)
 
 
-data LineCapStyle =
-      Butt
-    | RoundCap
-    | Square
-    deriving (Eq, Show)
+data LineCapStyle = Butt
+                  | RoundCap
+                  | Square
+                  deriving (Eq, Show)
 
-capToCInt :: LineCapStyle -> CInt
-capToCInt Butt     = _butt
-capToCInt RoundCap = _round
-capToCInt Square   = _square
+instance Flag LineCapStyle where
+    toCInt Butt     = _butt
+    toCInt RoundCap = _round
+    toCInt Square   = _square
 
 -- | Sets how the end of the line (cap) is drawn
 lineCap :: LineCapStyle -> VG ()
-lineCap style = applyContext $ \ptr -> c_lineCap ptr (capToCInt style)
+lineCap style = applyContext $ \ptr -> c_lineCap ptr (toCInt style)
 
 data LineJoinStyle =
       Miter
@@ -100,14 +95,15 @@ data LineJoinStyle =
     | Bevel
     deriving (Eq, Show)
 
-joinToCInt :: LineJoinStyle -> CInt
-joinToCInt Miter     = _miter
-joinToCInt RoundJoin = _round
-joinToCInt Bevel     = _bevel
+instance Flag LineJoinStyle where
+    toCInt Miter     = _miter
+    toCInt RoundJoin = _round
+    toCInt Bevel     = _bevel
+
 
 -- | Sets how sharp path corners are drawn.
 lineJoin :: LineJoinStyle -> VG ()
-lineJoin style = applyContext $ \ptr -> c_lineJoin ptr (joinToCInt style)
+lineJoin style = applyContext $ \ptr -> c_lineJoin ptr (toCInt style)
 
 -- | Sets the transparency applied to all rendered shapes.
 --   Already transparent paths will get proportionally more transparent as well.
