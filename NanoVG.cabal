@@ -231,6 +231,7 @@ executable Text
     sdl2,
     OpenGLRaw,
     text,
+    bytestring,
     linear
   default-language:    Haskell2010
 

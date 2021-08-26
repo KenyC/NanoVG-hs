@@ -6,7 +6,10 @@ module Render where
 import Control.Monad
 --
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as BS
+import qualified Data.ByteString    as BS
+import qualified Data.Text          as Text
+import qualified Data.Text.Encoding as Text
+import Data.List (elemIndex)
 --
 import Linear.V2
 import Linear.Vector
@@ -47,6 +50,12 @@ render context windowResolution WindowState{..} = do
             (V2 150 100)
             mousePosition
             time
+
+        drawParagraph
+            normalFont
+            (V2 (width - 450) 50)
+            (V2 150 100)
+            mousePosition
 
         drawColorwheel 
             (V2 (width - 300) (height -300))
@@ -548,3 +557,112 @@ drawWindow title font pos dims@(V2 width height) = do
             title
 
         return ()
+
+drawParagraph :: Font
+              -> V2 Float
+              -> V2 Float
+              -> V2 Float
+              -> VG ()
+drawParagraph font position dims@(V2 width _) mousePosition = do
+    let paragraph :: ByteString
+        paragraph = Text.encodeUtf8 "This is longer chunk of text.\n  \n  Would have used lorem ipsum but she    was busy jumping over the lazy dog with the fox and all the men who came to the aid of the party.🎉"
+
+    let relMousePos@(V2 relMousePosX relMousePosY) = mousePosition - position
+    let slice start end = (BS.take (end - start)) . (BS.drop start)
+    -- let slice start end = (BS.take (end - start - 1)) . (BS.drop 1000)
+
+
+    withNewState $ do
+        fontFace font
+        FontMetrics _ _ lineHeight <- fontMetrics
+
+        textRows <- byteStringBreakLines paragraph width
+
+        translate position
+        forM_ (zip [0..] textRows) $ \(i, TextRow{..}) -> do
+            let hit = all (>=0) (relMousePos - (V2 0 (i * lineHeight))) && 
+                      all (> 0) ((V2 width ((i+1) * lineHeight) - relMousePos))
+
+            let row    = slice _startIndex _endIndex paragraph
+            let rowPos = V2 0 (i * lineHeight)
+            let lineWidth = _maxX - _minX
+
+
+            withPath Open $ do
+                rect (V2 _minX (i * lineHeight))
+                     (V2 lineWidth lineHeight)
+            fillColor $ fromRGBA 255 255 255 $ if hit then 64 
+                                                      else 16
+            fill
+
+            fontSize 15
+            textAlign $ Align LeftAlign Top
+            fillColor  $ fromRGB 255 255 255
+            byteString rowPos row
+
+            when hit $ do
+
+                ------------------- Print caret -----------------
+                glyphPos <- byteStringGlyphPos row rowPos
+                let positions = (map _logicalX glyphPos) ++ [lineWidth]
+                    midPoints = (0:) $ flip map (zip positions $ tail positions) $ \(x, y) -> 0.3 * x + 0.7 * y 
+                    caretX = case elemIndex True $ map (> relMousePosX) midPoints of
+                                Just i  -> positions !! i
+                                Nothing -> 0
+
+                withPath Open $ do
+                    rect
+                        (rowPos + V2 caretX 0)
+                        (V2 1 lineHeight)
+                
+                fillColor $ fromRGB 255 192 0
+                fill
+
+                ------------------- Print Gutter -----------------
+                let gutterPos  = rowPos + (V2 (-10) (lineHeight / 2))
+                let textLineNo = Text.pack $ show $ floor i
+                fontSize 12
+                textAlign $ Align RightAlign Middle
+                (textPos, textDims) <- textBounds
+                                         gutterPos
+                                         textLineNo
+
+                withPath Open $ do
+                    roundedRect
+                        (textPos  - V2 4 2)
+                        (textDims + V2 8 4)
+                        3
+                fillColor $ fromRGB 255 192 0
+                fill
+
+                fillColor $ fromRGB 32 32 32
+                void $ text gutterPos textLineNo
+
+        let tooltipText = "Hover your mouse over the text to see calculated caret position."
+
+        fontSize 11
+        textAlign $ Align LeftAlign Top
+        textLineHeight 1.2
+
+
+
+        let tooltipPos_  = V2 0 ((fromIntegral $ length textRows) * lineHeight)
+        (tooltipPos, tooltipDims) <- byteStringBoxBounds tooltipPos_ 150 tooltipText
+
+        withPath Open $ do
+            roundedRect 
+                (tooltipPos  - 2)
+                (tooltipDims + 4)
+                3
+            let V2 midX _   = (tooltipPos + tooltipDims) / 2
+                V2 _ yPos   = tooltipPos
+            moveTo $ V2 midX (yPos - 10)
+            lineTo $ V2 (midX - 7) (yPos + 1)
+            lineTo $ V2 (midX + 7) (yPos + 1)
+
+
+        fillColor $ fromRGB 220 220 220
+        fill
+
+        fillColor $ fromRGB 0 0 0
+        byteStringBox tooltipPos_ 150 tooltipText
