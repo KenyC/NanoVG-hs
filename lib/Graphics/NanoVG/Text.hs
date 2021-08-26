@@ -54,6 +54,7 @@ import Linear.V2
 import Data.Text (Text)
 import qualified Data.Text.Foreign as Text
 import Data.ByteString (ByteString)
+import qualified Data.ByteString        as BS (null)
 import qualified Data.ByteString.Unsafe as BS
 import Data.Bits ((.|.))
 
@@ -168,13 +169,15 @@ text (V2 x y) contents = applyContext $ \ptr ->
 byteString :: V2 Float   -- ^ where to write text
            -> ByteString -- ^ what to write  (ByteString representing text as UTF-8)
            -> VG Float   -- ^ horizontal advance of text (i.e. where a potential next character should be drawn)
-byteString (V2 x y) contents = applyContext $ \ptr -> 
-    BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
-        realToFrac <$> c_text 
-            ptr 
-            (realToFrac x) (realToFrac y)
-            contentsC
-            (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
+byteString (V2 x y) contents 
+    | BS.null contents = return x   -- NanoVG functions don't check for null pointers ; occasionally an empty ByteString is associated to a null pointer.
+    | otherwise        = applyContext $ \ptr -> 
+        BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
+            realToFrac <$> c_text 
+                ptr 
+                (realToFrac x) (realToFrac y)
+                contentsC
+                (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
 
 
 -- | Writes text at given location. If text is longer than provided width, text is broken in multiple lines at word boundaries. 
@@ -199,14 +202,16 @@ byteStringBox :: V2 Float   -- ^ where to write text
               -> Float      -- ^ width of text
               -> ByteString -- ^ what to write (ByteString representing text as UTF-8)
               -> VG ()
-byteStringBox (V2 x y) width contents = applyContext $ \ptr -> 
-    BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
-        c_textBox
-            ptr 
-            (realToFrac x) (realToFrac y)
-            (realToFrac width)
-            contentsC
-            (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
+byteStringBox (V2 x y) width contents
+    | BS.null contents = return ()   -- NanoVG functions don't check for null pointers ; occasionally an empty ByteString is associated to a null pointer.
+    | otherwise        = applyContext $ \ptr -> 
+        BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
+            c_textBox
+                ptr 
+                (realToFrac x) (realToFrac y)
+                (realToFrac width)
+                contentsC
+                (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
 
 
 

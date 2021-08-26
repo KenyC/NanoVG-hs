@@ -7,6 +7,7 @@ import qualified SDL
 import Graphics.GL
 --
 import Control.Monad
+import Control.Monad.IO.Class
 --
 import Foreign.ForeignPtr
 --
@@ -14,6 +15,7 @@ import Linear.V2
 --
 import Data.Text (Text)
 import qualified Data.Text.Encoding as Text
+import qualified Data.ByteString    as BS
 
 import Graphics.NanoVG
 import Graphics.NanoVG.Color
@@ -23,7 +25,6 @@ import Graphics.NanoVG.Draw
 import Graphics.NanoVG.Path
 import Graphics.NanoVG.Transform
 import Glew
-import Test
 
 
 
@@ -44,7 +45,7 @@ main = do
   
     glClearColor 1 1 1 1
 
-    nanovg     <- nvgGL3Context [debug]
+    nanovg     <- nvgGL3Context [Debug]
     Just robotoFont <- withContext nanovg $ createFont "resources/Roboto-Bold.ttf"
 
     let render = do
@@ -127,8 +128,8 @@ main = do
                                 lineTo $ V2 width y
                                 stroke
 
-
-
+                    -- test null pointer ByteString's
+                    void $ byteString 20 $ BS.drop 2 ""
 
     let appLoop = do
             render
