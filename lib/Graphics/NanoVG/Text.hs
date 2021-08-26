@@ -258,18 +258,20 @@ textBoxBounds (V2 x y) width contents = applyContext $ \ptr -> do
 byteStringBounds :: V2 Float                -- ^ text position
                  -> ByteString              -- ^ text
                  -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
-byteStringBounds (V2 x y) contents = applyContext $ \ptr -> do
-    BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
-        withArray [0, 0, 0, 0] $ \bounds -> do
-            void $ c_textBounds
-                ptr 
-                (realToFrac x) (realToFrac y)
-                contentsC
-                (plusPtr contentsC $ size * sizeOf (undefined :: CChar))    
-                bounds
-            boundsList <- peekArray 4 bounds 
-            let xMin:yMin:xMax:yMax:_ = map realToFrac boundsList
-            return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
+byteStringBounds pos@(V2 x y) contents
+    | BS.null contents = return (pos, 0)
+    | otherwise        = applyContext $ \ptr -> do
+        BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
+            withArray [0, 0, 0, 0] $ \bounds -> do
+                void $ c_textBounds
+                    ptr 
+                    (realToFrac x) (realToFrac y)
+                    contentsC
+                    (plusPtr contentsC $ size * sizeOf (undefined :: CChar))    
+                    bounds
+                boundsList <- peekArray 4 bounds 
+                let xMin:yMin:xMax:yMax:_ = map realToFrac boundsList
+                return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
 
 
 -- | Returns position and size of the smallest box containing the text written by the corresponding call to 'byteStringBox'.
@@ -277,19 +279,21 @@ byteStringBoxBounds :: V2 Float                -- ^ text position
                     -> Float                   -- ^ width
                     -> ByteString              -- ^ text
                     -> VG (V2 Float, V2 Float) -- ^ (position top left corner, width x height)
-byteStringBoxBounds (V2 x y) width contents = applyContext $ \ptr -> do
-    BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
-        withArray [0, 0, 0, 0] $ \bounds -> do
-            void $ c_textBoxBounds
-                ptr 
-                (realToFrac x) (realToFrac y)
-                (realToFrac width)
-                contentsC
-                (plusPtr contentsC $ size * sizeOf (undefined :: CChar))    
-                bounds
-            boundsList <- peekArray 4 bounds 
-            let xMin:yMin:xMax:yMax:_ = map realToFrac boundsList
-            return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
+byteStringBoxBounds pos@(V2 x y) width contents
+    | BS.null contents = return (pos, 0)
+    | otherwise        = applyContext $ \ptr -> do
+        BS.unsafeUseAsCStringLen contents $ \(contentsC, size) -> do
+            withArray [0, 0, 0, 0] $ \bounds -> do
+                void $ c_textBoxBounds
+                    ptr 
+                    (realToFrac x) (realToFrac y)
+                    (realToFrac width)
+                    contentsC
+                    (plusPtr contentsC $ size * sizeOf (undefined :: CChar))    
+                    bounds
+                boundsList <- peekArray 4 bounds 
+                let xMin:yMin:xMax:yMax:_ = map realToFrac boundsList
+                return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
 
 
 data FontMetrics = FontMetrics {
@@ -325,31 +329,32 @@ data TextRow = TextRow {
 byteStringBreakLines :: ByteString
                      -> Float
                      -> VG [TextRow]
-byteStringBreakLines contents width = applyContext $ \ptr -> BS.unsafeUseAsCStringLen contents $ \(textC, len) -> do
+byteStringBreakLines contents width
+    | BS.null contents = return []
+    | otherwise        = applyContext $ \ptr -> BS.unsafeUseAsCStringLen contents $ \(textC, len) -> do
+        let withIter = bracket before after
+            before   = c_startIterTextLines 
+                            textC
+                            (plusPtr textC $ len * sizeOf (undefined :: CChar)) 
+                            (realToFrac width)
+            after    = free
+        alloca $ \row ->
+            withIter $ \iter -> do
 
-    let withIter = bracket before after
-        before   = c_startIterTextLines 
-                        textC
-                        (plusPtr textC $ len * sizeOf (undefined :: CChar)) 
-                        (realToFrac width)
-        after    = free
-    alloca $ \row ->
-        withIter $ \iter -> do
-
-            let loop = do
-                        notDone <- c_iterTextLines ptr iter row
-                        if notDone == 0
-                        then return []
-                        else do
-                            Internal.CTextRow start end widthLine minX maxX <- peek row
-                            let item = TextRow 
-                                            (fromIntegral start) 
-                                            (fromIntegral end) 
-                                            (realToFrac   widthLine) 
-                                            (realToFrac   minX) 
-                                            (realToFrac   maxX)
-                            (item:) <$> loop
-            loop
+                let loop = do
+                            notDone <- c_iterTextLines ptr iter row
+                            if notDone == 0
+                            then return []
+                            else do
+                                Internal.CTextRow start end widthLine minX maxX <- peek row
+                                let item = TextRow 
+                                                (fromIntegral start) 
+                                                (fromIntegral end) 
+                                                (realToFrac   widthLine) 
+                                                (realToFrac   minX) 
+                                                (realToFrac   maxX)
+                                (item:) <$> loop
+                loop
 
 
 data GlyphPosition = GlyphPosition {
@@ -363,28 +368,30 @@ data GlyphPosition = GlyphPosition {
 byteStringGlyphPos :: ByteString
                    -> V2 Float
                    -> VG [GlyphPosition]
-byteStringGlyphPos contents (V2 posX posY) = applyContext $ \ptr -> BS.unsafeUseAsCStringLen contents $ \(textC, len) -> do
-    let withIter = bracket before after
-        before   = c_startIterTextGlyph 
-                        textC
-                        (plusPtr textC $ len * sizeOf (undefined :: CChar)) 
-                        (realToFrac posX)
-                        (realToFrac posY)
-        after    = free
-    alloca $ \glyph ->
-        withIter $ \iter -> do
+byteStringGlyphPos contents (V2 posX posY) 
+    | BS.null contents = return []
+    | otherwise = applyContext $ \ptr -> BS.unsafeUseAsCStringLen contents $ \(textC, len) -> do
+        let withIter = bracket before after
+            before   = c_startIterTextGlyph 
+                            textC
+                            (plusPtr textC $ len * sizeOf (undefined :: CChar)) 
+                            (realToFrac posX)
+                            (realToFrac posY)
+            after    = free
+        alloca $ \glyph ->
+            withIter $ \iter -> do
 
-            let loop = do
-                        notDone <- c_iterTextGlyph ptr iter glyph
-                        if notDone == 0
-                        then return []
-                        else do
-                            Internal.CTextGlyph index logicalX minX maxX <- peek glyph
-                            let item = GlyphPosition 
-                                            (fromIntegral index) 
-                                            (realToFrac   logicalX) 
-                                            (realToFrac   minX) 
-                                            (realToFrac   maxX)
-                            (item:) <$> loop
-            loop
+                let loop = do
+                            notDone <- c_iterTextGlyph ptr iter glyph
+                            if notDone == 0
+                            then return []
+                            else do
+                                Internal.CTextGlyph index logicalX minX maxX <- peek glyph
+                                let item = GlyphPosition 
+                                                (fromIntegral index) 
+                                                (realToFrac   logicalX) 
+                                                (realToFrac   minX) 
+                                                (realToFrac   maxX)
+                                (item:) <$> loop
+                loop
 
