@@ -82,7 +82,7 @@ withImage (NVGContext context) pathToImage flags =
 -- | Load an image from memory.
 withImageRGBA :: NVGContext      -- ^ NanoVG context
               -> V2 Int          -- ^ Image dimensions (width, height)
-              -> ByteString      -- ^ Image RGBA data. The layout of the data is column-first, channel-last: at index i*height*4 + j**4 + c, is found the *c*-th component of the pixel in row i and column j.
+              -> ByteString      -- ^ Image RGBA data. The layout of the data is column-first, channel-last: at index i*height*4 + j*4 + c, is found the c-th component of the pixel in row i and column j.
               -> [ImageFlag]     -- ^ Flags 
               -> (Image -> IO a) -- ^ Computation to be run with image
               -> IO a

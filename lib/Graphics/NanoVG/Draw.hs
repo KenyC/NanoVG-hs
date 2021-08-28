@@ -5,8 +5,21 @@ Copyright   : (c) Keny C, 2021
 License     : MIT
 Stability   : experimental
 
-To draw something, you need to give NanoVG a path (i.e. a list of lines or strokes) and then a method for rendering these segments.
-This module defines the functions for rendering a path ('stroke' or 'fill') and for tweaking rendering settings ('strokeColor', 'fillColor', 'strokeWidth', etc.)
+To draw something, you need to give NanoVG a path (i.e. a list of lines or strokes) and then a method for rendering these segments. Here is a typical workflow:
+
+@
+-- First draw a rectangular path
+withPath Open $ do
+    rect (V2 0 0) (V2 100 200)
+
+-- Then render it
+fillColor $ fromRGB 255 0 0
+fill
+strokeColor $ fromRGB 0 255 0
+stroke
+@
+
+This module defines the functions for rendering a path, like 'stroke' or 'fill', and for tweaking rendering settings, like 'strokeColor', 'fillColor', 'strokeWidth', etc.
 
 For functions to create the path, see 'Graphics.NanoVG.Path'. 
 -}
@@ -48,8 +61,8 @@ data CompositeOp =
     | Lighter            -- ^ Where both shapes overlap the color is determined by adding color values.        
     | Copy               -- ^ Only the new shape is shown.     
     | Xor                -- ^ Shapes are made transparent where both overlap and drawn normal everywhere else.    
-    | CustomOp         Int Int
-    | CustomOpSeparate Int Int Int Int
+    | CustomOp         Int Int          -- ^ Custom arithmetic blending.
+    | CustomOpSeparate Int Int Int Int  -- ^ Custom arithmetic blending with separate values for alpha.
     deriving (Eq, Show)
 
 instance Flag CompositeOp where
@@ -131,7 +144,7 @@ miterLimit limit = applyContext $ \ptr -> c_miterLimit ptr (realToFrac limit)
 stroke :: VG ()
 stroke = applyContext c_stroke
 
--- | Sets color of strokes
+-- | Sets color of strokes.
 strokeColor :: Color
             -> VG ()
 strokeColor Color{..} = 

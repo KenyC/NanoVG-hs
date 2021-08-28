@@ -37,9 +37,11 @@ fromRGB
     -> Color
 fromRGB red green blue = Color (red / 255) (green / 255) (blue / 255) 1
 
-lerpRGBA :: Color
-         -> Color
-         -> Float
+
+-- | Linear interpolation between the RGBA values of two colors
+lerpRGBA :: Color -- ^ color 1
+         -> Color -- ^ color 2
+         -> Float -- ^ interpolation factor. When 0, the function returns color 1. When 1, the function returns color 2
          -> Color
 lerpRGBA 
     (Color red1 blue1 green1 alpha1)
@@ -52,11 +54,12 @@ lerpRGBA
         (lerp alpha1  alpha2  factor)
         where lerp a b t = t * a + (1 - t) * b
 
+-- | Creates Color from HSLA values in range [0 .. 1]
 fromHSLA 
-    :: Float
-    -> Float
-    -> Float
-    -> Float
+    :: Float -- ^ hue
+    -> Float -- ^ saturation
+    -> Float -- ^ luminance
+    -> Float -- ^ alpha
     -> Color
 fromHSLA hue' saturation' luminance' alpha' =
     Color 

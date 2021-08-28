@@ -8,6 +8,8 @@ Stability   : experimental
 This module define functions to load fonts and render text to the screen.
 Fonts are loaded from file via 'createFont'. Text is then rendered through one of 'text' or 'byteString' (one line text), 'textBox' or 'byteStringBox' (multi-line text). 
 Every function that asks for 'ByteString' argument expects them to represent UTF-8 encoded text.
+
+NB: functions calling for 'ByteString' arguments are more efficient, because they don't require copying the data.
 -}
 module Graphics.NanoVG.Text (
     Font(..),
@@ -121,6 +123,7 @@ instance Flag VAlign where
     toCInt Bottom   = _align_bottom
     toCInt Baseline = _align_baseline
 
+-- | Horizontal and vertical alignment
 data Align = Align !HAlign !VAlign deriving (Show, Eq)
 
 instance Flag Align where
@@ -296,13 +299,15 @@ byteStringBoxBounds pos@(V2 x y) width contents
                 return (V2 xMin yMin, V2 (xMax - xMin) (yMax - yMin))
 
 
+-- | Information about a font's metric characteristic.
 data FontMetrics = FontMetrics {
     _ascending  :: !Float,  -- ^ how much a letter can go above the baseline 
     _descending :: !Float,  -- ^ how much a letter can go below the baseline (letters with tails like j, g)
-    _lineHeight :: !Float
+    _lineHeight :: !Float   -- ^ total line height
 } deriving (Eq, Show)
 
 
+-- | Get the metrics of the current font.
 fontMetrics :: VG FontMetrics
 fontMetrics = applyContext $ \ptr -> do
     alloca $ \ascendingC   -> do
@@ -315,6 +320,7 @@ fontMetrics = applyContext $ \ptr -> do
             `ap` (realToFrac <$> peek descendingC)
             `ap` (realToFrac <$> peek lineHeightC)
 
+-- | This data type stores information about the position and dimensions of a particular line of text.
 data TextRow = TextRow {
     _startIndex :: Int,    -- ^ index where the given row starts in the bytestring
     _endIndex   :: Int,    -- ^ index where the given row ends in the bytestring
@@ -357,6 +363,7 @@ byteStringBreakLines contents width
                 loop
 
 
+-- | This data type stores information about the position and dimensions of a particular glyph in the text.
 data GlyphPosition = GlyphPosition {
       _index     :: Int    -- ^ index in of glyph's starting byte in original byte string
     , _logicalX  :: Float  -- ^ logical x position of glyph
@@ -364,10 +371,10 @@ data GlyphPosition = GlyphPosition {
     , _maxXGlyph :: Float  -- ^ maximum x position of glyph
 } deriving (Eq, Show)
 
---
-byteStringGlyphPos :: ByteString
-                   -> V2 Float
-                   -> VG [GlyphPosition]
+-- | Returns the position the the glyphs of a given text would have if it were drawn using 'text' or 'byteString'.
+byteStringGlyphPos :: ByteString         -- ^ text (UTF-8 encoded)
+                   -> V2 Float           -- ^ position of text
+                   -> VG [GlyphPosition] -- ^ the glyphs' position
 byteStringGlyphPos contents (V2 posX posY) 
     | BS.null contents = return []
     | otherwise = applyContext $ \ptr -> BS.unsafeUseAsCStringLen contents $ \(textC, len) -> do

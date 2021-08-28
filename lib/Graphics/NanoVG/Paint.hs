@@ -6,7 +6,7 @@ License     : MIT
 Stability   : experimental
 
 This module allow you to initialize and use 'Paint's. 'Paint's allow you to 'fill' paths with non-uniform, gradient and image color patterns.
-Three gradient 'Paint's are defined: 'linearGradient', 'radialGradient', 'boxGradient'. Once created, the 'Paint' can be made current with 'fillPaint'.
+Three gradient 'Paint's are defined: 'linearGradient', 'radialGradient', 'boxGradient'. Once created, the 'Paint' can be used with 'fillPaint'.
 -}
 module Graphics.NanoVG.Paint where
 

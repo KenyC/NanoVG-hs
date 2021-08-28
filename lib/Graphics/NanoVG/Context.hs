@@ -31,8 +31,8 @@ data NVGContext = NVGContext {
 
 -- | Window resolution. Needed by 'frame'.
 data WindowResolution = WindowResolution {
-    _size :: !(V2 Float),
-    _dpi  :: !Float
+    _size     :: !(V2 Float), -- ^ (V2 width height) in pixels
+    _pxRatio  :: !Float       -- ^ Number of physical pixels per number of logical pixels. Typically 1. On certain monitors, the value is higher than 1. To know the exact pixel ratio, divide OpenGL frame buffer size by window size. For more info, cf HiDPI or Apple Retina Display.
 }
 
 -- | Monad for drawing instructions. 
@@ -55,9 +55,9 @@ applyContext function = VG $ withReaderT _getNVGContext $ do
                             liftIO $ withForeignPtr foreignPtr function
 
 
-data InitFlag = Antialias      -- ^ All drawings are anti-aliased
-              | StencilStrokes -- ^ ?
-              | Debug          -- ^ ?
+data InitFlag = Antialias      -- ^ Whether drawings should-be anti-aliased
+              | StencilStrokes -- ^ Whether strokes be drawn using the stencil buffer. Slower rendering but overlapping path are drawn just once.
+              | Debug          -- ^ Whether additional debug checks on OpenGL calls should be run. 
               deriving (Eq, Show)
 
 instance Flag InitFlag where

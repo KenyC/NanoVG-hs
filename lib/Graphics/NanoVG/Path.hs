@@ -5,13 +5,26 @@ Copyright   : (c) Keny C, 2021
 License     : MIT
 Stability   : experimental
 
-To draw something, you need to give NanoVG a path (i.e. a list of lines or strokes) and then a method for rendering these segments.
-This module defines the functions for creating a path.
+To draw something, you need to give NanoVG a path (i.e. a list of lines or strokes) and then a method for rendering these segments. Here is a typical workflow:
+
+@
+-- First draw a rectangular path
+withPath Open $ do
+    rect (V2 0 0) (V2 100 200)
+
+-- Then render it
+fillColor $ fromRGB 255 0 0
+fill
+strokeColor $ fromRGB 0 255 0
+stroke
+@
+
+This module defines the functions for creating a path, including 'withPath' and 'rect'.
 
 Every path instruction for the current path ought to be in the scope 'withPath'. Basic paths can be created via a series of calls to 'moveTo' (displaces current position) and 'lineTo' (adds the line between current position and new position, updates current position). 
 More complex shapes can be created with 'circle', 'rect', 'roundedRect', etc.
 
-For functions to draw the path after it is created, see 'Graphics.NanoVG.Draw'. 
+For functions that can draw or fill the path once it is created, see 'Graphics.NanoVG.Draw'. 
 -}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Graphics.NanoVG.Path where

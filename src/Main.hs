@@ -40,7 +40,7 @@ main = do
     SDL.initialize [SDL.InitVideo]
 
     let windowSize = V2 1000 600
-    let windowResolution = WindowResolution (realToFrac <$> windowSize) 4.0
+    let windowResolution = WindowResolution (realToFrac <$> windowSize) 1.0
     window <- SDL.createWindow "Test" $ SDL.defaultWindow {
         SDL.windowInitialSize     = windowSize,
         SDL.windowGraphicsContext = SDL.OpenGLContext $ SDL.defaultOpenGL {SDL.glProfile = SDL.Core SDL.Normal 3 3}
