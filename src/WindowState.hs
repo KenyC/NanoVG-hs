@@ -3,6 +3,7 @@ module WindowState where
 import Linear.V2
 import FpsWidget
 import Graphics.NanoVG.Text
+import Graphics.NanoVG.Image
 
 data WindowState = WindowState {
     time          :: !Float,
@@ -10,5 +11,6 @@ data WindowState = WindowState {
     graph         :: !FpsGraph,
     boldFont      :: !Font,
     normalFont    :: !Font,
-    iconFont      :: !Font
+    iconFont      :: !Font,
+    images        :: ![Image]
 }

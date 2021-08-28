@@ -23,6 +23,7 @@ import Graphics.NanoVG.Path
 import Graphics.NanoVG.Paint
 import Graphics.NanoVG.Color
 import Graphics.NanoVG.Text
+import Graphics.NanoVG.Scissor
 import Graphics.NanoVG.Transform
 --
 import qualified FpsWidget as Fps
@@ -75,7 +76,7 @@ render context windowResolution WindowState{..} = do
         let posDropDown  = posSearchBox + V2 0 40
         drawDropDown "Effects" normalFont iconFont posDropDown (V2 280 28)
 
-        let popY          = posDropDown + V2 0 14
+        let V2 _ popY     = posDropDown + V2 0 14
         let posLabelForm  = posDropDown + V2 0 45
         drawLabel "Login" normalFont posLabelForm (V2 200 20)
 
@@ -118,6 +119,11 @@ render context windowResolution WindowState{..} = do
             (V2 110 28)
             (fromRGBA 0 0 0 0)
 
+        drawThumbnails
+            (V2 365 (popY - 30))
+            (V2 160 300)
+            images
+            time
 
 
         Fps.drawGraph graph 0 normalFont
@@ -666,3 +672,179 @@ drawParagraph font position dims@(V2 width _) mousePosition = do
 
         fillColor $ fromRGB 0 0 0
         byteStringBox tooltipPos_ 150 tooltipText
+
+drawThumbnails :: V2 Float
+               -> V2 Float
+               -> [Image]
+               -> Float
+               -> VG ()
+drawThumbnails pos dims@(V2 width height) images time = do
+        let cornerRadius = 3
+            arrY         = 30.5
+
+        withNewState $ do
+            translate pos
+
+            -- Shadow
+            shadowPaint <- boxGradient 
+                    (V2 0 4) dims
+                    (cornerRadius * 2) 20
+                    (fromRGBA 0 0 0 128)
+                    (fromRGBA 0 0 0 0)
+            withPath Open $ do
+                rect 
+                    (-10)
+                    (dims + V2 20 30)
+                roundedRect 0 dims cornerRadius
+                pathWinding Hole
+            fillPaint shadowPaint
+            fill
+
+            -- Window
+            withPath Open $ do
+                roundedRect 0 dims cornerRadius
+                moveTo $ V2 (-10) arrY 
+                lineTo $ V2 1     (arrY-11)
+                lineTo $ V2 1     (arrY+11)
+            fillColor $ fromRGB 200 200 200
+            fill
+
+            -- images
+            let thumbnailSize = 60 :: Float
+            let stackHeight  = ((fromIntegral $ length images) / 2) * (thumbnailSize + 10) + 10
+            let scrollH      = (height / stackHeight) * (height - 8)
+            let scrollLevel  = (1 + (cos $ time * 0.5)) * 0.5
+            let spinnerLevel = (1 - (cos $ time * 0.2)) * 0.5
+
+            withNewState $ do
+                scissor 0 dims
+                translate $ V2 0 $ - (stackHeight - height) * scrollLevel
+                forM_ (zip [0 ..] images) $ \(i, image) -> do
+                    imageDims <- imageSize image
+
+                    let V2 width height = fromIntegral <$> imageDims
+                        approxPlace = 10 + (thumbnailSize + 10) *^ (fromIntegral <$> V2 (i `rem` 2) (i `quot` 2))
+                        aspectRatio = width / height
+                        imageDisplaySize
+                            | width > height = V2 thumbnailSize (thumbnailSize / aspectRatio)
+                            | otherwise      = V2 (aspectRatio * thumbnailSize) thumbnailSize
+
+                        positionImage = approxPlace - 0.5 *^ (imageDisplaySize - thumbnailSize *^ 1)
+
+
+                    -- spinner
+                    let dVelocity      = 1 / (fromIntegral $ length images - 1)
+                    let velocity       = (fromIntegral i) * dVelocity
+
+                    let loadLevel      = min 1 $ max 0 $ (spinnerLevel - velocity) / dVelocity
+
+                    when (loadLevel < 1) $ do
+                        drawSpinner 
+                            (positionImage + 0.5 *^ imageDisplaySize)
+                            (thumbnailSize * 0.25) 
+                            time
+
+
+                    imagePaint <- imagePattern positionImage imageDisplaySize 0 loadLevel image
+                    -- imagePaint <- imagePattern 0 200 0 1 image
+                    withPath Open $ do
+                        roundedRect 
+                            positionImage 
+                            imageDisplaySize
+                            5
+                            -- (V2 thumbnailSize thumbnailSize)
+                    fillPaint imagePaint
+                    fill
+
+                    shadowPaint <- boxGradient 
+                                        (positionImage - V2 1 0)
+                                        (imageDisplaySize + 2)
+                                        5 3
+                                        (fromRGBA 0 0 0 128)
+                                        (fromRGBA 0 0 0 0)
+                    withPath Open $ do
+                        rect
+                            (positionImage - 5)
+                            (imageDisplaySize + 10)
+                        roundedRect positionImage imageDisplaySize 6
+                        pathWinding Hole
+                    fillPaint shadowPaint
+                    fill
+
+                    withPath Open $ do
+                        roundedRect 
+                            (positionImage + 0.5)
+                            (imageDisplaySize - 1)
+                            (4 - 0.5)
+                    strokeWidth 1
+                    strokeColor $ fromRGBA 255 255 255 192
+                    stroke
+                    return ()
+
+            -- Hide fades : not sure what this is supposed to do visually
+            -- fadePaint <- linearGradient 
+            --                     0 (V2 0 6)
+            --                     (fromRGBA 255 0 0 255)
+            --                     (fromRGBA 200 200 200 0)
+            --                     -- (fromRGBA 200 200 200 255)
+            -- withPath Open $ 
+            --     rect 
+            --         (V2 4 0)
+            --         (V2 (width - 8) 6)
+            -- fillPaint fadePaint
+            -- fill
+
+
+
+            -- scroll bars
+            shadowPaint <- boxGradient
+                                (V2 (width - 12 + 1) (4 + 1))
+                                (V2 8 (height - 8))
+                                3 4
+                                (fromRGBA 0 0 0 32)
+                                (fromRGBA 0 0 0 92)
+            withPath Open $
+                roundedRect
+                    (V2 (width - 12) 4)
+                    (V2 8 (height - 8))
+                    3
+            fillPaint shadowPaint
+            fill
+
+
+            shadowPaint <- boxGradient
+                                (V2 (width - 12) (4 + (height - 8 - scrollH) * scrollLevel - 1))
+                                (V2 8 scrollH)
+                                3 4
+                                (fromRGB 220 220 220)
+                                (fromRGB 128 128 128)
+            withPath Open $
+                roundedRect
+                    (V2 (width - 12 + 1) (4 + 1 + (height - 8 - scrollH) * scrollLevel))
+                    (V2 (8-2) (scrollH - 2))
+                    2
+            fillPaint shadowPaint
+            fill
+
+drawSpinner :: V2 Float -- middle position
+            -> Float    -- radius
+            -> Float    -- time
+            -> VG ()
+drawSpinner midPos outerRadius time = withNewState $ do
+    let innerRadius = 0.75 * outerRadius
+        angleInit   = 0  + time * 6
+        angleEnd    = pi + time * 6
+
+    withPath Closed $ do
+        arc midPos outerRadius angleInit angleEnd  True
+        arc midPos innerRadius angleEnd  angleInit False
+
+    let posInit = midPos + angle angleInit ^* ((innerRadius + outerRadius) / 2)
+    let posEnd  = midPos + angle angleEnd  ^* ((innerRadius + outerRadius) / 2)
+
+    paint <- linearGradient 
+                    posInit posEnd
+                    (fromRGBA 0 0 0 0)
+                    (fromRGBA 0 0 0 128)
+    fillPaint paint
+    fill

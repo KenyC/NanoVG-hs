@@ -80,6 +80,7 @@ executable demo
     text,
     bytestring,
     vector,
+    mtl,
     linear
   default-language:    Haskell2010
 

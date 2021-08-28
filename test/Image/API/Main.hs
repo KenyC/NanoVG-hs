@@ -26,7 +26,6 @@ import Graphics.NanoVG.Image
 import Graphics.NanoVG.Transform
 import Graphics.NanoVG.Paint
 import Glew
-import Test
 
 
 -- A radial gradient from black to green
