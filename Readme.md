@@ -5,7 +5,7 @@ NanoVG-hs is small vector graphics rendering library for OpenGL. Its API is mode
 
 Here is a replication of the demo of the orginal library
 
-![Screenshot](resources/screenshot.png)
+![Screenshot](resources/demo_screenshot.png)
 
 ## Features
 
