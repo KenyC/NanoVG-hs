@@ -58,6 +58,7 @@ main = do
                     let label = "Aloha !"
                         pos   = 20
                     void $ text pos label 
+                    void $ text pos "" 
                     (position, dims) <- textBounds pos label
                     withPath Open $ do
                         rect position dims

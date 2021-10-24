@@ -54,6 +54,7 @@ import Foreign.Marshal.Alloc
 import Linear.V2
 --
 import Data.Text (Text)
+import qualified Data.Text         as Text
 import qualified Data.Text.Foreign as Text
 import Data.ByteString (ByteString)
 import qualified Data.ByteString        as BS (null)
@@ -159,13 +160,15 @@ resetFallbackFont (Font fontId) = applyContext $ \ptr ->
 text :: V2 Float -- ^ where to write text
      -> Text     -- ^ what to write
      -> VG Float -- ^ horizontal advance of text (i.e. where a potential next character should be drawn)
-text (V2 x y) contents = applyContext $ \ptr -> 
-    Text.withCStringLen contents $ \(contentsC, size) -> do
-        realToFrac <$> c_text 
-            ptr 
-            (realToFrac x) (realToFrac y)
-            contentsC
-            (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
+text (V2 x y) contents 
+    | Text.null contents = return x -- Segfaults if not (not sure why)
+    | otherwise          = applyContext $ \ptr ->
+                             Text.withCStringLen contents $ \(contentsC, size) -> do
+                                 realToFrac <$> c_text 
+                                     ptr 
+                                     (realToFrac x) (realToFrac y)
+                                     contentsC
+                                     (plusPtr contentsC $ size * sizeOf (undefined :: CChar))
 
 -- | Writes text UTF-8 encoded as ByteString at given location. ByteString equivalent of 'text'. 
 --   This function is more efficient as it does not involve copying data.

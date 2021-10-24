@@ -39,7 +39,7 @@ data WindowResolution = WindowResolution {
 --   Under the hood, a reader monad over IO, with NanoVG context as parameter
 newtype VG a = VG {
     unwrapVG :: ReaderT NVGContext IO a
-} deriving (Functor, Applicative, Monad, MonadIO)
+} deriving (Functor, Applicative, Monad, MonadIO, MonadFail)
 
 
 -- | Performs vector graphics drawing in the given context
