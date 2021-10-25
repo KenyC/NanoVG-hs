@@ -38,6 +38,7 @@ module Graphics.NanoVG.Text (
     GlyphPosition(..),
     addFallbackFont,
     resetFallbackFont,
+    textGlyphPos,
     byteStringGlyphPos
 ) where
 
@@ -381,6 +382,37 @@ byteStringGlyphPos :: ByteString         -- ^ text (UTF-8 encoded)
 byteStringGlyphPos contents (V2 posX posY) 
     | BS.null contents = return []
     | otherwise = applyContext $ \ptr -> BS.unsafeUseAsCStringLen contents $ \(textC, len) -> do
+        let withIter = bracket before after
+            before   = c_startIterTextGlyph 
+                            textC
+                            (plusPtr textC $ len * sizeOf (undefined :: CChar)) 
+                            (realToFrac posX)
+                            (realToFrac posY)
+            after    = free
+        alloca $ \glyph ->
+            withIter $ \iter -> do
+
+                let loop = do
+                            notDone <- c_iterTextGlyph ptr iter glyph
+                            if notDone == 0
+                            then return []
+                            else do
+                                Internal.CTextGlyph index logicalX minX maxX <- peek glyph
+                                let item = GlyphPosition 
+                                                (fromIntegral index) 
+                                                (realToFrac   logicalX) 
+                                                (realToFrac   minX) 
+                                                (realToFrac   maxX)
+                                (item:) <$> loop
+                loop
+
+-- | Returns the position the the glyphs of a given text would have if it were drawn using 'text' or 'byteString'.
+textGlyphPos :: Text               -- ^ text
+             -> V2 Float           -- ^ position of text
+             -> VG [GlyphPosition] -- ^ the glyphs' position
+textGlyphPos contents (V2 posX posY) 
+    | Text.null contents = return []
+    | otherwise = applyContext $ \ptr -> Text.withCStringLen contents $ \(textC, len) -> do
         let withIter = bracket before after
             before   = c_startIterTextGlyph 
                             textC
