@@ -27,7 +27,6 @@ import Graphics.NanoVG.Internal.Draw
 import Graphics.NanoVG.Internal.Text
 import Graphics.NanoVG.Internal.Path
 import Glew
-import Test
 
 
 

@@ -253,15 +253,20 @@ int nvgIterTextGlyph(
 {
 	NVGglyphPosition glyph_pos;
 
-	if(iter -> capacity == 1) {
-		return 0;
-	}
-	else if(iter -> head < iter -> capacity - 1) {
+	if(iter -> head < iter -> capacity) {
 		// Draw from buffer
 		glyph_pos = iter -> buffer_glyphs[iter -> head++];
 	}
+	else if (
+		iter -> capacity != 0 &&
+		iter -> capacity < TEXT_GLYPHS_BUFFER_SIZE
+	) {
+		return 0;
+	}
 	else {
+		int firstLoad = iter -> start == iter -> current;
 		// load some more
+		LOG("Loading some more! From %p\n", iter -> current);
 		iter -> capacity = nvgTextGlyphPositions(
 			ctx,
 			iter -> x, iter -> y,
@@ -271,8 +276,16 @@ int nvgIterTextGlyph(
 		);
 		if(iter -> capacity == 0) return 0;
 		iter -> current = iter -> buffer_glyphs[iter -> capacity - 1].str;
-		iter -> head    = 1;
-		glyph_pos = iter -> buffer_glyphs[0];
+		iter -> x       = iter -> buffer_glyphs[iter -> capacity - 1].x;
+
+		if(firstLoad) {
+			iter -> head    = 1;
+			glyph_pos = iter -> buffer_glyphs[0];
+		}
+		else {
+			iter -> head    = 2;
+			glyph_pos = iter -> buffer_glyphs[1];
+		}
 	}
 
 	result -> position  = glyph_pos.str - iter -> start;
