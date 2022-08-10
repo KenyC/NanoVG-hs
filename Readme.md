@@ -20,13 +20,13 @@ Here is a replication of the demo of the orginal library
  1. Set up an OpenGL context. For instance, using [OpenGLRaw](https://hackage.haskell.org/package/OpenGLRaw) and [sdl2](https://hackage.haskell.org/package/sdl2): 
 
 ```haskell
-import Linear.V2         -- linear package
-import Graphics.GL       -- OpenGLRaw package
-import Graphics.NanoVG   -- NanoVG-hs package
-import qualified SDL     -- sdl2 pacakge
+{-# LANGUAGE OverloadedStrings #-}
+import Linear.V2       -- linear package
+import Graphics.GL     -- OpenGLRaw package
+import Graphics.NanoVG -- NanoVG-hs package
+import qualified SDL   -- sdl2 pacakge
+import Control.Monad (unless)
 
-import
-main :: IO ()
 main = do
     SDL.initialize [SDL.InitVideo]
 
@@ -37,25 +37,29 @@ main = do
         SDL.windowGraphicsContext = SDL.OpenGLContext $ SDL.defaultOpenGL {SDL.glProfile = SDL.Core SDL.Normal 3 3}
     }
     
-    context <- SDL.glCreateContext window
+    _context <- SDL.glCreateContext window
     -- glewInit -- you may need to initialize GLEW depending on your platform
 
     nvgContext <- nvgGL3Context [Debug]
     glClearColor 0.3 0.3 0.3 1
 
-    let app = do
-    	glClear GL_COLOR_BUFFER_BIT
-    	frame nvgContext windowResolution renderDemo -- render is where the drawing is done!
-        
-    	SDL.glSwapWindow window
+    let quit (SDL.Event _ SDL.QuitEvent) = True
+        quit _ = False
 
-        events <- SDL.pollEvents
-        unless (any qui) $ app
+    let app = do
+            glClear GL_COLOR_BUFFER_BIT
+            frame nvgContext windowResolution renderDemo -- render is where the drawing is done!
+            
+            SDL.glSwapWindow window
+
+            events <- SDL.pollEvents
+            unless (any quit events) $ app
 
     app
     SDL.destroyWindow window
     SDL.quit
 ```
+
 
  2. Display a rounded rectangle using drawing primitives
 
@@ -70,3 +74,5 @@ renderDemo = do
 	strokeColor $ fromRGB 127 25 0
 	stroke 
 ```
+
+(If you get a segfault, it may mean that you need to initialize GLEW, cf comment in `main` function)

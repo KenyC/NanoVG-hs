@@ -10,6 +10,7 @@ module Graphics.NanoVG(
     -- Context.hs
     NVGContext,
     WindowResolution(..),
+    VG(),
     InitFlag(..),
     nvgGL3Context,
     withContext,

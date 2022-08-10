@@ -19,7 +19,7 @@ extra-source-files:  CHANGELOG.md
 
 custom-setup
   setup-depends:
-    base  >=4.13 && <4.14,
+    base,
     Cabal >= 1.10,
     directory
 
@@ -47,7 +47,7 @@ library
     Graphics.NanoVG.Scissor
     Graphics.NanoVG.Transform
   build-depends:
-    base >=4.13 && <4.14,
+    base,
     mtl,
     bytestring,
     text,
@@ -74,8 +74,8 @@ executable demo
   -- other-extensions:
   build-depends:       
     NanoVG,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     bytestring,
@@ -92,8 +92,8 @@ executable Rect
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -107,8 +107,8 @@ executable Draw
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -122,8 +122,8 @@ executable RectInternal
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -137,8 +137,8 @@ executable Path
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -152,8 +152,8 @@ executable PathInternal
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -168,8 +168,8 @@ executable Paint
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -183,8 +183,8 @@ executable PaintInternal
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -198,8 +198,8 @@ executable Transform
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -213,8 +213,8 @@ executable TransformInternal
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -228,8 +228,8 @@ executable Text
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     bytestring,
@@ -244,8 +244,8 @@ executable TextInternal
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -259,8 +259,8 @@ executable Image
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear,
@@ -275,8 +275,8 @@ executable ImageInternal
   build-depends:       
     NanoVG,
     -- glew,
-    base >=4.13 && <4.14,
-    sdl2,
+    base,
+    sdl2 >= 2.0,
     OpenGLRaw,
     text,
     linear
@@ -288,7 +288,7 @@ test-suite Color
   type:                exitcode-stdio-1.0
   build-depends:       
     NanoVG,
-    base >=4.13 && <4.14,
+    base,
     OpenGLRaw,
     tasty,
     tasty-hunit,
